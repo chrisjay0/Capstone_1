@@ -47,15 +47,11 @@ class User(db.Model):
         nullable=False,
     )
 
-    lists = db.relationship('UserList',)
+    lists = db.relationship('UserList',
+                            backref='User',)
 
     created_item = db.relationship(
         "MagicItem",
-    )
-
-    liked_item = db.relationship(
-        'MagicItem',
-        secondary="item_likes"
     )
     
     date_created = db.Column(
@@ -72,30 +68,6 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
-
-class ItemLikes(db.Model):
-    """Mapping user liked items to items."""
-
-    __tablename__ = 'item_likes' 
-
-    # id = db.Column(
-    #     db.Integer,
-    #     primary_key=True
-    # )
-
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id',
-                      ondelete='cascade',),
-        primary_key=True,
-        )
-
-    item_id = db.Column(
-        db.Integer,
-        db.ForeignKey('magic_items.id',
-                      ondelete='cascade',),
-        primary_key=True,
-    )
 
 
 

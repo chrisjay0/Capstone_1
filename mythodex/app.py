@@ -2,10 +2,14 @@ import os
 
 from flask import Flask, render_template
 from flask_debugtoolbar import DebugToolbarExtension
+import random
 
 from database.models import db, connect_db
 
 import requests
+
+from magic_items.models import MagicItem 
+from lists.models import UserList, ItemUserList 
 
 app = Flask(__name__)
 
@@ -27,11 +31,22 @@ connect_db(app)
 
 @app.route('/')
 def show_homepage():
+    
+    
+    rand_magic_id = random.randrange(1,363)
+    rand_magic = MagicItem.query.get(rand_magic_id)
+    
+    test_list = UserList.query.get(1)
+    
+    
+    
+    
+    
     res = requests.get("https://www.dnd5eapi.co/api/magic-items/adamantine-armor/").json()
     
     
     
-    return render_template('home.html',response=res)
+    return render_template('home.html',response=rand_magic,list=test_list)
 
 
 @app.errorhandler(404)

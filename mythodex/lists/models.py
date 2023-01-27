@@ -1,11 +1,7 @@
 """SQLAlchemy model for Lists."""
 
 from app import db
-
 from datetime import datetime
-
-
-
 # db = SQLAlchemy()
     
     
@@ -45,7 +41,6 @@ class UserList(db.Model):
     name = db.Column(
         db.Text,
         nullable=False,
-        unique=True,
     )
 
     desc = db.Column(db.Text)
@@ -68,15 +63,12 @@ class UserList(db.Model):
                       ondelete='cascade',),
         nullable=False,
     )
+    
+    # item = db.relationship('ItemUserList',
+    #                               backref='list')
 
-    user = db.relationship('User',)
-
-    items = db.relationship(
-        "MagicItem",
-        secondary="item_lists",
-        primaryjoin=(ItemUserList.item_id == id),
-        secondaryjoin=(ItemUserList.list_id == id),
-        cascade="all,delete",
-    )
+    items = db.relationship('MagicItem',
+                               secondary='item_lists',
+                               backref='list')
     
     

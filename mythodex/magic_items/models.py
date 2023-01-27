@@ -4,26 +4,26 @@
 from datetime import datetime
 
 from app import db
-
-from import_services import ItemUserList
     
 class ItemVariant(db.Model):
     """Mapping Magic Items to the Magic Item of which they are a variant."""
 
     __tablename__ = 'item_variants'
 
-    original_item_id = db.Column(
+    id = db.Column(
         db.Integer,
-        db.ForeignKey('magic_items.id'),
         primary_key=True,
     )
     
-    variant_item_id = db.Column(
-        db.Integer,
-        db.ForeignKey('magic_items.id'),
-        primary_key=True,
+    original_item_name = db.Column(
+        db.Text,
+        nullable=False,
     )
-
+    
+    variant_item_name = db.Column(
+        db.Text,
+        nullable=False,
+    )
 
 class MagicItem(db.Model):
     """MagicItem."""
@@ -50,18 +50,12 @@ class MagicItem(db.Model):
         nullable=False,
     )
 
-    variants = db.relationship(
-        "MagicItem",
-        secondary="item_variants",
-        primaryjoin=(ItemVariant.original_item_id == id),
-        secondaryjoin=(ItemVariant.variant_item_id == id)
+    has_variants = db.Column(
+        db.Boolean,
     )
 
-    variant_of = db.relationship(
-        "MagicItem",
-        secondary="item_variants",
-        primaryjoin=(ItemVariant.variant_item_id == id),
-        secondaryjoin=(ItemVariant.original_item_id == id)
+    is_variant = db.Column(
+        db.Boolean,
     )
 
     description = db.Column(
@@ -92,13 +86,20 @@ class MagicItem(db.Model):
         default=datetime.utcnow(),
     )
 
-    lists = db.relationship(
-        "UserList",
-        secondary="item_lists",
-        primaryjoin=(ItemUserList.list_id == id),
-        secondaryjoin=(ItemUserList.item_id == id),
-        cascade="all,delete",
-    )
+    # lists = db.relationship(
+    #     "UserList",
+    #     secondary="item_lists",
+    #     primaryjoin=(ItemUserList.list_id == id),
+    #     secondaryjoin=(ItemUserList.item_id == id),
+    #     cascade="all,delete",
+    # )
+    
+    # user_list = db.relationship('ItemUserList',
+    #                               backref='list')
+
+    # lists = db.relationship('UserList',
+    #                            secondary='item_lists',
+    #                            backref='lists')
 
     def __repr__(self):
         return f"<Magic Item #{self.id}: {self.name}, {self.item_type}>"

@@ -4,13 +4,14 @@
 
     {{list.name}}
 </p>
-
-<div class="card" style="width: 18rem;">
-    <div class="card-body">
-      <h5 class="card-title">
-        {{ response.name}} <i class="ra ra-knight-helmet ra-xl" alt='armor'></i></h5>
-      <p class="card-text">{{ response.description}}</p>
-      <a href="#" class="btn btn-primary">Go somewhere</a>
-    </div>
-  </div>
+{% with name = response.name, desc = desc, id = response.id %}
+{% include 'itemcard.html' %}
+{% endwith %}
+  <p>
+    {% for item in list.items %}
+    <ul>
+      <li>{{item.name}}</li>
+    </ul>
+    {% endfor %}
+  </p>
 {% endblock %}

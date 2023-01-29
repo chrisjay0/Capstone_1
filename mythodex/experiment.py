@@ -7,11 +7,11 @@ from magic_items.models import MagicItem, ItemVariant
 
 import requests
 
-new_item_for_list = ItemUserList(
-    item_id = 58,
-    list_id = 1,
-    times_on_list = 1,
+new_list = UserList(
+    name='test',
+    desc='nin',
+    user_id=1,
 )
 
-db.session.add(new_item_for_list)
+db.session.add(new_list)
 db.session.commit()

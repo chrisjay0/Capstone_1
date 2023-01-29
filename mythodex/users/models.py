@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask_bcrypt import Bcrypt
 
-from app import db
+from database.models import db
 
 bcrypt = Bcrypt()
 

@@ -11,8 +11,7 @@
   <script src="https://unpkg.com/popper"></script>
   <script src="https://unpkg.com/bootstrap"></script>
 
-  <link rel="stylesheet"
-        href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
   <link rel="stylesheet" href="/static/stylesheets/style.css">
   <link rel="shortcut icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/css/css/rpg-awesome.css">
@@ -27,7 +26,7 @@
   <meta name="application-name" content="Mythodex">
   <meta name="msapplication-TileColor" content="#00aba9">
   <meta name="msapplication-config" content="/static/favicon/browserconfig.xml">
-  <meta name="theme-color" content="#ffffff"> 
+  <meta name="theme-color" content="#ffffff">
 
   {{ modals() }}
 </head>
@@ -40,8 +39,9 @@
         <i class="ra ra-crystal-ball ra-lg p-8" style="color:rgb(202, 245, 245);" alt="mythodex logo"></i>
         <span style="color:rgb(202, 245, 245);">Mythodex</span>
       </a>
-    
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -49,23 +49,26 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dropdown
-            </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="#">Action</a></li>
               <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
               <li><a class="dropdown-item" href="#">Something else here</a></li>
             </ul>
           </li>
+          {% if not g.user %}
           <li class="nav-item">
-            <a class="nav-link disabled">Disabled</a>
+            <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-trigger="hover focus" data-bs-content="Login or Sign Up to manage lists">
+              <a class="nav-link disabled" disabled>My Lists</a>
+            </span>
           </li>
+          {% else %}
+          <li class="nav-item">
+            <a  href="/user/{{ g.user.id }}/lists" class="nav-link">My Lists</a>
+          </li>
+          {% endif %}
         </ul>
 
         <ul class="navbar-nav">
@@ -80,7 +83,8 @@
         </form>
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-circle-user fa-2x fa-inverse"></i>
+            <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i
+                class="fa-solid fa-circle-user fa-2x fa-inverse"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               {% if not g.user %}
@@ -96,32 +100,38 @@
                 <a class="dropdown-item" href="/users/{{ g.user.id }}">Profile</a>
               </li>
               <li>
-                <a class="dropdown-item" href="/user/lists/{{ g.user.id }}">My Lists</a>
+                <a class="dropdown-item" href="/user/{{ g.user.id }}/lists">My Lists</a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
               </li>
               <li>
                 <a class="dropdown-item" href="/logout">Log out</a>
               </li>
               {% endif %}
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
             </ul>
           </li>
-        </ul>       
+        </ul>
       </div>
     </div>
   </nav>
-  
-  <div class='container-fluid'>
+
+  <div class='container-fluid p-5'>
     {% for category, message in get_flashed_messages(with_categories=True) %}
     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
       {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>    
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
     {% block content %}
     {% endblock %}
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+    integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>

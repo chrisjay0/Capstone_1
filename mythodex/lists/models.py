@@ -43,7 +43,7 @@ class UserList(db.Model):
         nullable=False,
     )
 
-    desc = db.Column(db.Text)
+    description = db.Column(db.Text)
     
     date_created = db.Column(
         db.DateTime,

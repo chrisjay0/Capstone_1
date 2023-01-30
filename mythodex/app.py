@@ -5,6 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_modals import Modal, render_template_modal
 import random
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 
 from database.models import db, connect_db
 
@@ -12,7 +13,7 @@ import requests
 
 from magic_items.models import MagicItem 
 from magic_items.services import shorten_description 
-from lists.services import UserList, ItemUserList, add_list
+from lists.services import UserList, ItemUserList, add_list, get_user_lists, get_list, update_list
 from lists.forms import ListAddForm
 from users.forms import UserAddForm, LoginForm, ListAddForm
 from users.services import signup_user, User, authenticate_user
@@ -53,10 +54,10 @@ def show_homepage():
 
             
             flash('new list '+ new_list.name +' added','success')
-            return render_template('home.html',response=rand_magic,desc=short_m_desc,list=test_list,form=form)
+            return render_template('home.html',response=rand_magic,description=short_m_desc,list=test_list,form=form)
         except:
             flash('error','danger')
-            return render_template('home.html',response=rand_magic,desc=short_m_desc,list=test_list,form=form)
+            return render_template('home.html',response=rand_magic,description=short_m_desc,list=test_list,form=form)
             
     
     
@@ -163,7 +164,37 @@ def logout():
 ##############################################################################
 # List Routes
 
+@app.route('/lists/<int:list_id>', methods=["GET"])
+def show_list(list_id):
+    
+    item_list = UserList.query.get_or_404(list_id)
+    return render_template('lists/list.html',list=item_list)
 
+@app.route('/lists/<int:list_id>/edit', methods=["GET","POST"])
+def edit_list(list_id):
+
+    if not g.user:
+        flash("Please login to manage lists.", "danger")
+        return redirect("/login")
+    
+    list_to_edit = get_list(list_id)
+
+    if g.user.id != list_to_edit.user_id:
+        flash("Unauthorized to edit that list", "danger")
+        return redirect(f"/user/{g.user.id}/lists")
+    
+    form = ListAddForm(obj=list_to_edit)
+    
+    if not form.validate_on_submit():
+        return render_template("/lists/edit_list.html",list=list_to_edit,form=form)
+    
+    if not update_list(list_to_edit.id, form):
+        flash('Unable to update {list_to_edit.name}','danger')
+        return render_template("/lists/edit_list.html",list=list_to_edit,form=form)
+
+    flash(f'Succesfully updated {list_to_edit.name}!','success')
+    return redirect(f'/lists/{list_to_edit.id}')
+    
 @app.route('/my-lists/add-list', methods=["GET", "POST"])
 def add_new_list():
 
@@ -177,7 +208,7 @@ def add_new_list():
         try:
             new_list = UserList(
                 name=form.name.data,
-                desc=form.description.data,
+                description=form.description.data,
                 user_id=g.user.id,
             )
             
@@ -217,16 +248,30 @@ def add_new_list_with_item(list_id, item_id):
         return redirect('/')
 
 
-@app.route('/my-lists', methods=["GET", "POST"])
-def show_user_lists():
-
-    if not g.user:
-        flash("Please login to create a new list", "danger")
-        return redirect("/login")
+@app.route('/user/<int:user_id>/lists', methods=["GET"])
+def show_user_lists(user_id):
     
-    
+    lists = get_user_lists(user_id)
         
     return render_template('lists/user_lists.html',lists=lists)
+
+
+@app.route('/user/<int:user_id>/lists/<int:list_id>/delete', methods=["POST"])
+def delete_list(user_id,list_id):
+
+    if not g.user:
+        flash("Please login to manage lists.", "danger")
+        return redirect("/login")
+
+    if g.user.id != user_id:
+        flash("Please login to manage lists.", "danger")
+        return redirect(f"/user/{g.user.id}/lists")
+
+    user_list = UserList.query.get(list_id)
+    db.session.delete(user_list)
+    db.session.commit()
+
+    return redirect(f"/user/{g.user.id}/lists")
     
 
 

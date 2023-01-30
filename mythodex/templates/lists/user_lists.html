@@ -1,7 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-<p>
-    
-    hello
-  </p>
+<div class="container p-3">
+    <div class="row row-cols-auto">
+        {% for list in lists %}
+            <div class="col">{% include 'lists/listcard.html' %}</div>
+        {% endfor %}
+    </div>
+  </div>
+<ul>
+    {% for list in lists %}
+    <li>     
+        {% include 'lists/listcard.html' %}
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}

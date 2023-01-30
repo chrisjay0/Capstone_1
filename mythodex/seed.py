@@ -31,7 +31,7 @@ db.session.commit()
 u_list = UserList(
         name = 'test list',
         user_id = 1,
-        desc = 'test desc',)
+        description = 'test desc',)
 
 db.session.add(u_list)
 db.session.commit()

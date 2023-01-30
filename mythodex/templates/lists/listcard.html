@@ -1,0 +1,85 @@
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h5 class="card-title">
+            {{ list.name }}</h5>
+        <p class="card-text">{{list.description}}</p>
+        <div class="row align-items-end">
+            <div class="col-7 align-items-start">
+                <a href="/lists/{{list.id}}" class="btn btn-primary btn-sm">See list</a>
+            </div>
+            <div class="col-5">
+                <div class="row justify-content-end">
+                    <div class="col-4"><i class="fa-solid fa-share-from-square fa-xl"></i></div>
+                    {% if g.user.id == list.user_id %}
+                        <div class="col-4">
+                            <a href="/lists/{{list.id}}/edit"><i class="fa-solid fa-pen-to-square fa-xl" style="color: black;"></i></a></div>
+                        <div class="col-4">
+
+                                <a href='#' class="fa-solid fa-trash-can fa-xl" data-bs-toggle="modal" style="color: black;" data-bs-target="#deleteListWarningModal"></a>
+
+                        </div>
+                    {% endif %}
+                    <!-- <div class="col-4 dropdown">
+                            <a href="#" style="color: black;" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="fa-solid fa-plus fa-xl"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+
+                                {% if not g.user %}
+                                <li><span class="dropdown-item disabled">Please login or signup to <br> add this item to a list</span>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/signup">Sign up</a></li>
+                                <li><a class="dropdown-item" href="/login">Log in</a></li>
+                                {% else %}
+                                <li><span class="dropdown-item disabled">Add item to which list?</span>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                {% for list in g.user.lists %}
+                                <li>
+                                    <a class="dropdown-item" href="/my-lists/{{ list.id }}/add-item/{{id}}">{{list.name}}</a>
+                                </li>
+                                {% endfor %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/my-lists/add-list">Create a new list!</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="deleteListWarningModal" tabindex="-1" aria-labelledby="deleteListWarningModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-danger" id="deleteListWarningModalLabel">Delete List</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Do you really want to delete the {{ list.name }} list permanently?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <form method="POST"
+                action="/user/{{g.user.id}}/lists/{{list.id}}/delete">
+            <button class="btn btn-outline-danger">Delete {{ list.name }} permanently</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -103,3 +103,9 @@ class MagicItem(db.Model):
 
     def __repr__(self):
         return f"<Magic Item #{self.id}: {self.name}, {self.item_type}>"
+
+    def shorten_description(self):
+        desc = self.description
+        if len(desc) <= 55:
+            return desc
+        return desc[0:55] + '...'

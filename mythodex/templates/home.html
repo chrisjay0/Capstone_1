@@ -5,7 +5,7 @@
     {{list.name}}
 </p>
 {% with name = response.name, desc = desc, id = response.id %}
-{% include 'itemcard.html' %}
+    {% include 'magic_items/itemcard.html' %}
 {% endwith %}
   <p>
     {% for item in list.items %}

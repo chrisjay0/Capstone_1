@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{item.name}}</h1>
+<p><i>source: {{item.source}}</i></p>
+{% for description_line in item.description %}
+    <p>{{description_line}}</p>
+{% endfor %}
+{% endblock %}

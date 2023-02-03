@@ -70,7 +70,7 @@ def show_homepage():
     
     
     
-    return render_template_modal('home.html',response=rand_magic,desc=short_m_desc,list=test_list,form=form)
+    return render_template_modal('home.html',item=rand_magic,response=rand_magic,desc=short_m_desc,list=test_list,form=form)
 
 
 @app.errorhandler(404)
@@ -272,6 +272,16 @@ def delete_list(user_id,list_id):
     db.session.commit()
 
     return redirect(f"/user/{g.user.id}/lists")
+
+
+##############################################################################
+# Magic Item Routes
+
+@app.route('/magic-items/<int:item_id>', methods=["GET"])
+def show_item(item_id):
+    
+    item = MagicItem.query.get_or_404(item_id)
+    return render_template('magic_items/magic_item.html',item=item)
     
 
 

@@ -1,6 +1,6 @@
 """SQLAlchemy model for Lists."""
 
-from app import db
+from database.models import db
 from datetime import datetime
 # db = SQLAlchemy()
     

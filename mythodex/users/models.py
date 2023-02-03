@@ -50,9 +50,9 @@ class User(db.Model):
     lists = db.relationship('UserList',
                             backref='User',)
 
-    created_item = db.relationship(
+    created_items = db.relationship(
         "MagicItem",
-    )
+        backref='created_by',)
     
     date_created = db.Column(
         db.DateTime,

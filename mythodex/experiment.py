@@ -7,11 +7,13 @@ from magic_items.models import MagicItem, ItemVariant
 
 import requests
 
-new_list = UserList(
-    name='test',
-    desc='nin',
-    user_id=1,
-)
+# new_list = UserList(
+#     name='test',
+#     desc='nin',
+#     user_id=1,
+# )
 
-db.session.add(new_list)
-db.session.commit()
+# db.session.add(new_list)
+# db.session.commit()
+
+print(MagicItem.query.filter_by(name='Ammunition, +2').first().id)

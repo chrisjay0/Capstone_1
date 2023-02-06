@@ -1,14 +1,10 @@
 """SQLAlchemy model for User."""
 
-
 from datetime import datetime
-
 from flask_bcrypt import Bcrypt
-
 from database.models import db
 
 bcrypt = Bcrypt()
-
 
 class User(db.Model):
     """User in the system."""
@@ -47,7 +43,7 @@ class User(db.Model):
         nullable=False,
     )
 
-    lists = db.relationship('UserList',
+    collections = db.relationship('Collection',
                             backref='User',)
 
     created_items = db.relationship(
@@ -60,7 +56,7 @@ class User(db.Model):
         default=datetime.utcnow(),
     )
     
-    date_last_updated = db.Column(
+    last_updated = db.Column(
         db.DateTime,
         nullable=False,
         default=datetime.utcnow(),

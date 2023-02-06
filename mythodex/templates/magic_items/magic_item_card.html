@@ -2,7 +2,7 @@
     <div class="card-body d-flex flex-column">
         <h5 class="card-title">
             {{ item.name }} <i class="ra ra-knight-helmet ra-xl" alt='armor'></i></h5>
-        <p class="card-text">{{ item.shorten_description() }}</p>
+        <p class="card-text">{{ item.shorten_description }}</p>
         <div class="row align-bottom mt-auto p-1">
             <div class="col-8">
                 <div class="row justify-content-start">
@@ -20,7 +20,7 @@
 
                             {% if not g.user %}
                             <li><span class="dropdown-item disabled">Please login or signup to <br> add this item to a
-                                    list</span>
+                                    collection</span>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">
@@ -28,22 +28,23 @@
                             <li><a class="dropdown-item" href="/signup">Sign up</a></li>
                             <li><a class="dropdown-item" href="/login">Log in</a></li>
                             {% else %}
-                            <li><span class="dropdown-item disabled">Add item to which list?</span>
+                            <li><span class="dropdown-item disabled">Add item to which collection?</span>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            {% for list in g.user.lists %}
+                            {% for collection in g.user.collections %}
                             <li>
-                                <a class="dropdown-item"
-                                    href="/my-lists/{{ list.id }}/add-item/{{item.id}}">{{list.name}}</a>
+                                <form action="/my-collections/{{ collection.id }}/add-item/{{item.id}}" method="post">
+                                    <button type="submit" class="dropdown-item">{{collection.name}}</button>
+                                </form>
                             </li>
                             {% endfor %}
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/my-lists/add-list">Create a new list!</a>
+                                <a class="dropdown-item" href="/my-collections/add-collection">Create a new collection!</a>
                             </li>
                             {% endif %}
                         </ul>

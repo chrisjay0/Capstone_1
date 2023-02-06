@@ -1,4 +1,6 @@
-from users.models import User
+from users.models import User, User as UserModel
+from users.domains import User as UserDomain
+from users.forms import UserEditForm
 from datetime import datetime
 
 from flask_bcrypt import Bcrypt
@@ -50,3 +52,42 @@ def edit_user(username, email, image_url, header_image_url, bio, password):
     )
     
     return user
+
+#######################################
+# domain based services
+
+class UserServices:
+    
+    @classmethod
+    def get_by_username(cls, username: str) -> 'UserDomain':
+        user_model = UserModel.query.filter_by(username=username).first()
+        return UserDomain.from_model(user_model)
+    
+    @classmethod
+    def get_by_id(cls, user_id: int) -> 'UserDomain':
+        user_model = UserModel.query.get_or_404(user_id)
+        return UserDomain.from_model(user_model)
+    
+    @classmethod
+    def update(cls, user_id: int,
+                    form: UserEditForm,
+                    ) -> UserDomain:
+
+        user_model = UserModel.query.get_or_404(user_id)
+        password = form.password.data
+        is_authorized = bcrypt.check_password_hash(
+            user_model.password, 
+            password)
+
+        if user_model and is_authorized:
+            user_model.username = form.username.data
+            user_model.email = form.email.data
+            user_model.image_url = form.image_url.data
+            user_model.bio = form.bio.data
+            user_model.last_updated = datetime.utcnow()
+            
+            db.session.commit()
+            
+            return UserDomain.from_model(user_model)
+        
+        return False

@@ -1,17 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<p>{{response}}
-
-    {{list.name}}
+<p>{{item}}
 </p>
-{% with name = response.name, desc = desc, id = response.id %}
-    {% include 'magic_items/itemcard.html' %}
-{% endwith %}
-  <p>
-    {% for item in list.items %}
-    <ul>
-      <li>{{item.name}}</li>
-    </ul>
-    {% endfor %}
-  </p>
+{% include 'magic_items/magic_item_card.html' %}
 {% endblock %}

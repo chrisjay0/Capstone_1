@@ -1,8 +1,8 @@
 import os
 
-from flask import Flask, render_template, session, g, flash, redirect
+from flask import Flask, render_template, session, g, flash, redirect, request
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_modals import Modal, render_template_modal
+from flask_modals import Modal
 import random
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -12,11 +12,10 @@ from database.models import db, connect_db
 import requests
 
 from magic_items.models import MagicItem 
-from magic_items.services import shorten_description 
-from lists.services import UserList, ItemUserList, add_list, get_user_lists, get_list, update_list
-from lists.forms import ListAddForm
-from users.forms import UserAddForm, LoginForm, ListAddForm
-from users.services import signup_user, User, authenticate_user
+from magic_items.services import Collection, ItemCollection, add_collection, get_user_collections, get_collection, update_collection, get_magic_item, add_magic_item_to_list
+from magic_items.forms import CollectionAddForm, ItemAddForm
+from users.forms import UserAddForm, UserEditForm, LoginForm, ListAddForm
+from users.services import signup_user, User, authenticate_user, UserServices
 
 app = Flask(__name__)
 modal = Modal(app)
@@ -38,39 +37,11 @@ CURR_USER_KEY = "curr_user"
 ##############################################################################
 # Homepage and error pages
 
-
 @app.route('/', methods=["GET", "POST"])
 def show_homepage():
-    form=ListAddForm()
-    
-    if form.validate_on_submit():
-        try:
-            new_list = add_list(
-                name=form.name.data,
-                description=form.description.data,
-            )
-            db.session.add(new_list)
-            db.session.commit()
-
-            
-            flash('new list '+ new_list.name +' added','success')
-            return render_template('home.html',response=rand_magic,description=short_m_desc,list=test_list,form=form)
-        except:
-            flash('error','danger')
-            return render_template('home.html',response=rand_magic,description=short_m_desc,list=test_list,form=form)
-            
-    
-    
-    rand_magic_id = random.randrange(1,363)
-    rand_magic = MagicItem.query.get(rand_magic_id)
-    
-    test_list = UserList.query.get(1)
-    
-    short_m_desc = shorten_description(rand_magic)
-    
-    
-    
-    return render_template_modal('home.html',item=rand_magic,response=rand_magic,desc=short_m_desc,list=test_list,form=form)
+    return render_template('home.html',
+                           item = get_magic_item(random.randrange(1,363)),
+                           )
 
 
 @app.errorhandler(404)
@@ -79,31 +50,27 @@ def page_not_found(e):
 
     return render_template('404.html'), 404
 
-
 ##############################################################################
 # Signup / Login / Logout Routes
 
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in, add curr user to Flask global."""
+    """If logged in, add current user to Flask global."""
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
-
     else:
         g.user = None
 
-
 def do_login(user):
-
     session[CURR_USER_KEY] = user.id
 
-
 def do_logout():
-
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
+        
+
 
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -162,116 +129,145 @@ def logout():
 
 
 ##############################################################################
-# List Routes
+# User Routes
 
-@app.route('/lists/<int:list_id>', methods=["GET"])
-def show_list(list_id):
-    
-    item_list = UserList.query.get_or_404(list_id)
-    return render_template('lists/list.html',list=item_list)
+@app.route('/user/<int:user_id>')
+def show_user(user_id):
+    user = UserServices.get_by_id(user_id)
+    return render_template('users/user.html',user=user)
 
-@app.route('/lists/<int:list_id>/edit', methods=["GET","POST"])
-def edit_list(list_id):
+@app.route('/user/edit', methods=["GET","POST"])
+def edit_user():
+    user_id = int(request.args['user_id'])
 
     if not g.user:
-        flash("Please login to manage lists.", "danger")
+        flash("Please login to edit a profile.", "danger")
         return redirect("/login")
     
-    list_to_edit = get_list(list_id)
-
-    if g.user.id != list_to_edit.user_id:
-        flash("Unauthorized to edit that list", "danger")
-        return redirect(f"/user/{g.user.id}/lists")
+    if g.user.id != user_id:
+        flash(f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger")
+        return redirect(f"/user/{g.user.id}")
     
-    form = ListAddForm(obj=list_to_edit)
+    user = UserServices.get_by_id(user_id)
+    form = UserEditForm(obj=user)
     
     if not form.validate_on_submit():
-        return render_template("/lists/edit_list.html",list=list_to_edit,form=form)
+        return render_template(f'/users/edit.html',form=form)
     
-    if not update_list(list_to_edit.id, form):
-        flash('Unable to update {list_to_edit.name}','danger')
-        return render_template("/lists/edit_list.html",list=list_to_edit,form=form)
+    try:
+        user = UserServices.update(user.id, form)
+        flash(f'Succesfully updated profile','success')
+        return redirect(f"/user/{g.user.id}")
+    except:
+        flash(f'Unable to update profile','error')
+        return render_template(f'/users/edit.html',form=form)
 
-    flash(f'Succesfully updated {list_to_edit.name}!','success')
-    return redirect(f'/lists/{list_to_edit.id}')
+##############################################################################
+# List Routes
+
+@app.route('/collections/<int:collection_id>', methods=["GET"])
+def show_collection(collection_id):
     
-@app.route('/my-lists/add-list', methods=["GET", "POST"])
-def add_new_list():
+    item_collection = Collection.query.get_or_404(collection_id)
+    return render_template('magic_items/collection.html',collection=item_collection)
+
+@app.route('/collections/<int:collection_id>/edit', methods=["GET","POST"])
+def edit_collection(collection_id):
 
     if not g.user:
-        flash("Please login to create a new list", "danger")
+        flash("Please login to manage collections.", "danger")
         return redirect("/login")
     
-    form = ListAddForm()
+    collection_to_edit = get_collection(collection_id)
+
+    if g.user.id != collection_to_edit.user_id:
+        flash("Unauthorized to edit that collection", "danger")
+        return redirect(f"/user/{g.user.id}/collections")
+    
+    form = CollectionAddForm(obj=collection_to_edit)
+    
+    if not form.validate_on_submit():
+        return render_template("/magic_items/edit_collection.html",collection=collection_to_edit,form=form)
+    
+    if not update_collection(collection_to_edit.id, form):
+        flash('Unable to update {collection_to_edit.name}','danger')
+        return render_template("/magic_items/edit_collection.html",collection=collection_to_edit,form=form)
+
+    flash(f'Succesfully updated {collection_to_edit.name}!','success')
+    return redirect(f'/collections/{collection_to_edit.id}')
+    
+@app.route('/my-collections/add-collection', methods=["GET", "POST"])
+def add_new_collection():
+
+    if not g.user:
+        flash("Please login to create a new collection", "danger")
+        return redirect("/login")
+    
+    form = CollectionAddForm()
     
     if form.validate_on_submit():
         try:
-            new_list = UserList(
+            new_collection = Collection(
                 name=form.name.data,
                 description=form.description.data,
                 user_id=g.user.id,
             )
             
-            db.session.add(new_list)
+            db.session.add(new_collection)
             db.session.commit()
             
-            flash('new list '+ new_list.name +' added','success')
+            flash('new collection '+ new_collection.name +' added','success')
             return redirect('/')
         except:
             flash('error','danger')
-            return render_template('lists/new_list.html',form=form)
+            return render_template('magic_items/new_collection.html',form=form)
         
-    return render_template('lists/new_list.html',form=form)
+    return render_template('magic_items/new_collection.html',form=form)
 
 
-@app.route('/my-lists/<int:list_id>/add-item/<int:item_id>', methods=["GET", "POST"])
-def add_new_list_with_item(list_id, item_id):
+@app.route('/my-collections/<int:collection_id>/add-item/<int:item_id>', methods=["POST"])
+def add_new_collection_with_item(collection_id, item_id):
 
     if not g.user:
-        flash("Please login to create a new list", "danger")
+        flash("Please login to create a new collection", "danger")
         return redirect("/login")
     
-    item_list_map = ItemUserList(
-        item_id=item_id,
-        list_id=list_id,
-        times_on_list=1,
-    )
+    magic_item = get_magic_item(item_id)
+    collection = get_collection(collection_id)
     
-    try:
-        db.session.add(item_list_map)
-        db.session.commit()
-        flash('Item added to list!','success')
-        return redirect('/')
+    if not add_magic_item_to_list(magic_item,collection):
         
-    except:
-        flash('Error prevented adding item to list','danger')
+        flash('Error prevented adding item to collection','danger')
         return redirect('/')
-
-
-@app.route('/user/<int:user_id>/lists', methods=["GET"])
-def show_user_lists(user_id):
     
-    lists = get_user_lists(user_id)
+    flash('Item added to collection!','success')
+    return redirect(f'/collections/{collection_id}')
+
+
+@app.route('/user/<int:user_id>/collections', methods=["GET"])
+def show_user_collections(user_id):
+    
+    collections = get_user_collections(user_id)
         
-    return render_template('lists/user_lists.html',lists=lists)
+    return render_template('magic_items/collections.html',collections=collections)
 
 
-@app.route('/user/<int:user_id>/lists/<int:list_id>/delete', methods=["POST"])
-def delete_list(user_id,list_id):
+@app.route('/user/<int:user_id>/collections/<int:collection_id>/delete', methods=["POST"])
+def delete_collection(user_id,collection_id):
 
     if not g.user:
-        flash("Please login to manage lists.", "danger")
+        flash("Please login to manage collections.", "danger")
         return redirect("/login")
 
     if g.user.id != user_id:
-        flash("Please login to manage lists.", "danger")
-        return redirect(f"/user/{g.user.id}/lists")
+        flash("Please login to manage collections.", "danger")
+        return redirect(f"/user/{g.user.id}/collections")
 
-    user_list = UserList.query.get(list_id)
-    db.session.delete(user_list)
+    user_collection = Collection.query.get(collection_id)
+    db.session.delete(user_collection)
     db.session.commit()
 
-    return redirect(f"/user/{g.user.id}/lists")
+    return redirect(f"/user/{g.user.id}/collections")
 
 
 ##############################################################################

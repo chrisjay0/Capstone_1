@@ -13,3 +13,9 @@ class ItemAddForm(FlaskForm):
     has_variants = StringField('List Name', validators=[DataRequired()])
     is_variant = StringField('List Name', validators=[DataRequired()])
     description = StringField('List Name', validators=[DataRequired()])
+
+class CollectionAddForm(FlaskForm):
+    """Form for adding users."""
+
+    name = StringField('List Name', validators=[DataRequired()])
+    description = StringField('Description (Optional)')

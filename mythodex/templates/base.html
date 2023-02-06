@@ -60,13 +60,13 @@
           </li>
           {% if not g.user %}
           <li class="nav-item">
-            <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-trigger="hover focus" data-bs-content="Login or Sign Up to manage lists">
-              <a class="nav-link disabled" disabled>My Lists</a>
+            <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-trigger="hover focus" data-bs-content="Login or Sign Up to manage collections">
+              <a class="nav-link disabled" disabled>My collections</a>
             </span>
           </li>
           {% else %}
           <li class="nav-item">
-            <a  href="/user/{{ g.user.id }}/lists" class="nav-link">My Lists</a>
+            <a  href="/user/{{ g.user.id }}/collections" class="nav-link">My Collections</a>
           </li>
           {% endif %}
         </ul>
@@ -97,10 +97,10 @@
                 <hr class="dropdown-divider">
               </li>
               <li>
-                <a class="dropdown-item" href="/users/{{ g.user.id }}">Profile</a>
+                <a class="dropdown-item" href="/user/{{ g.user.id }}">Profile</a>
               </li>
               <li>
-                <a class="dropdown-item" href="/user/{{ g.user.id }}/lists">My Lists</a>
+                <a class="dropdown-item" href="/user/{{ g.user.id }}/collections">My collections</a>
               </li>
               <li>
                 <hr class="dropdown-divider">

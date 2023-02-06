@@ -2,9 +2,8 @@ from database.models import db
 from app import app
 import time
 
-from lists.models import ItemUserList, UserList
 from users.models import User
-from magic_items.models import MagicItem, ItemVariant
+from magic_items.models import MagicItem, ItemVariant,  ItemCollection, Collection
 
 import requests
 
@@ -29,27 +28,27 @@ item = MagicItem(
 db.session.add(item)
 db.session.commit()
 
-u_list = UserList(
-        name = 'test list',
+u_collection = Collection(
+        name = 'test collection',
         user_id = 1,
         description = 'test desc',)
 
-db.session.add(u_list)
+db.session.add(u_collection)
 db.session.commit()
 
-item_for_list = ItemUserList(
+item_for_collection = ItemCollection(
         item_id=1,
-        list_id=1,
-        times_on_list=1,)
+        collection_id=1,
+        times_on_collection=1,)
 
-db.session.add(item_for_list)
+db.session.add(item_for_collection)
 db.session.commit()
 
 res = requests.get("https://www.dnd5eapi.co/api/magic-items/adamantine-armor/").json()
 
 DND_API_URL = 'https://www.dnd5eapi.co/api/magic-items/'
 
-variant_indexing_list = []
+variant_indexing_collection = []
 
 res = requests.get(DND_API_URL).json()
 
@@ -63,7 +62,7 @@ for result in res.get('results'):
     else:
         for variant in item_res.get('variants'):
             new_variant_index = [item_res.get('name'), variant.get('name')]
-            variant_indexing_list.append(new_variant_index)
+            variant_indexing_collection.append(new_variant_index)
     
     item_description = []
     for description_line in item_res.get('desc'):
@@ -85,7 +84,7 @@ for result in res.get('results'):
 
 
 
-for variant_index in variant_indexing_list:
+for variant_index in variant_indexing_collection:
     
     original_id = int(MagicItem.query.filter_by(name=variant_index[0]).first().id)
     variant_id = int(MagicItem.query.filter_by(name=variant_index[1]).first().id)

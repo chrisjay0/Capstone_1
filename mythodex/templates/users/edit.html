@@ -4,8 +4,8 @@
 
   <div class="row justify-content-md-center">
   <div class="col-md-7 col-lg-5">
-    <h2 class="join-message">Edit {{ list.name }}</h2>
-    <form method="POST" id="list_form">
+    <h2 class="join-message">Welcome to Mythodex!</h2>
+    <form method="POST" id="user_form">
       {{ form.hidden_tag() }}
 
       {% for field in form if field.widget.input_type != 'hidden' %}
@@ -15,12 +15,9 @@
         {{ field(placeholder=field.label.text, class="form-control") }}
       {% endfor %}
 
-      <button class="btn btn-primary btn-lg btn-block">Update Name & Description</button>
+      <button class="btn btn-primary btn-lg btn-block">Sign me up!</button>
     </form>
   </div>
-  {% for item in list.items %}
-  
-  {% endfor %}
 </div>
 
 {% endblock %}

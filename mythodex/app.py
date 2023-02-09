@@ -7,6 +7,7 @@ import random
 from sqlalchemy.exc import IntegrityError
 
 from magic_items.routes import magic_routes
+from users.routes import user_routes
 
 
 
@@ -35,12 +36,13 @@ app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
 app.config["SECRET_KEY"] = "SECRET"
 
 app.register_blueprint(magic_routes)
+app.register_blueprint(user_routes)
 
 toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
-CURR_USER_KEY = "curr_user"
+CURR_USER_KEY = 'curr user'
 
 
 ##############################################################################
@@ -112,10 +114,6 @@ def logout():
     return redirect("/")
 
 
-##############################################################################
-# User Routes
-
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
@@ -137,64 +135,89 @@ def signup():
     return render_template("users/signup.html", form=form)
 
 
-@app.route("/users/<int:user_id>")
-def show_user(user_id):
-    user = UserService.get_by_id(user_id)
-    return render_template("users/user.html", user=user)
+# ##############################################################################
+# # User Routes
 
 
-@app.route("/users/edit", methods=["GET", "POST"])
-def edit_user():
-    user_id = int(request.args["user_id"])
+# @app.route("/signup", methods=["GET", "POST"])
+# def signup():
 
-    if not g.user:
-        flash("Please login to edit a profile.", "danger")
-        return redirect("/login")
+#     form = UserAddForm()
 
-    if g.user.id != user_id:
-        flash(
-            f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
-        )
-        return redirect(f"/users/{g.user.id}")
+#     if form.validate_on_submit():
+#         try:
+#             user = UserService.create(form)
 
-    user = UserService.get_by_id(user_id)
-    form = UserEditForm(obj=user)
+#             do_login(user)
 
-    if not form.validate_on_submit():
-        return render_template(f"/users/edit.html", user=user, form=form)
+#             flash(f"Welcome to Mythodex {user.username}", "success")
+#             return redirect(f"/users/{user.id}")
 
-    try:
-        user = UserService.update(user.id, form)
-        flash(f"Succesfully updated profile", "success")
-        return redirect(f"/users/{g.user.id}")
-    except:
-        flash(f"Unable to update profile", "error")
-        return render_template(f"/users/edit.html", user=user, form=form)
+#         except IntegrityError:
+#             flash("Username already taken", "danger")
+#             return render_template("users/signup.html", form=form)
+
+#     return render_template("users/signup.html", form=form)
 
 
-@app.route("/users/delete", methods=["POST"])
-def delete_user():
+# @app.route("/users/<int:user_id>")
+# def show_user(user_id):
+#     user = UserService.get_by_id(user_id)
+#     return render_template("users/user.html", user=user)
 
-    if not g.user:
-        flash("Please login to edit a profile.", "danger")
-        return redirect("/login")
 
-    user_id = int(request.args["user_id"])
-    form = UserEditForm()
+# @app.route("/users/edit", methods=["GET", "POST"])
+# def edit_user():
+#     user_id = int(request.args["user_id"])
 
-    if g.user.id != user_id:
-        flash(
-            f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
-        )
-        return redirect(f"/users/{g.user.id}")
+#     if not g.user:
+#         flash("Please login to edit a profile.", "danger")
+#         return redirect("/login")
 
-    if not form.validate_on_submit():
-        return redirect(f"/users/edit?user_id={g.user.id}")
+#     if g.user.id != user_id:
+#         flash(
+#             f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
+#         )
+#         return redirect(f"/users/{g.user.id}")
 
-    try:
-        UserService.delete(user_id, form)
-        flash(f"Your profile has been removed", "success")
-        return redirect("/")
-    except:
-        flash(f"Unable to update profile", "error")
-        return render_template(f"/users/edit.html", form=form)
+#     user = UserService.get_by_id(user_id)
+#     form = UserEditForm(obj=user)
+
+#     if not form.validate_on_submit():
+#         return render_template(f"/users/edit.html", user=user, form=form)
+
+#     try:
+#         user = UserService.update(user.id, form)
+#         flash(f"Succesfully updated profile", "success")
+#         return redirect(f"/users/{g.user.id}")
+#     except:
+#         flash(f"Unable to update profile", "error")
+#         return render_template(f"/users/edit.html", user=user, form=form)
+
+
+# @app.route("/users/delete", methods=["POST"])
+# def delete_user():
+
+#     if not g.user:
+#         flash("Please login to edit a profile.", "danger")
+#         return redirect("/login")
+
+#     user_id = int(request.args["user_id"])
+#     form = UserEditForm()
+
+#     if g.user.id != user_id:
+#         flash(
+#             f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
+#         )
+#         return redirect(f"/users/{g.user.id}")
+
+#     if not form.validate_on_submit():
+#         return redirect(f"/users/edit?user_id={g.user.id}")
+
+#     try:
+#         UserService.delete(user_id, form)
+#         flash(f"Your profile has been removed", "success")
+#         return redirect("/")
+#     except:
+#         flash(f"Unable to update profile", "error")
+#         return render_template(f"/users/edit.html", form=form)

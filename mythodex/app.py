@@ -42,6 +42,9 @@ CURR_USER_KEY = "curr_user"
 
 @app.route("/", methods=["GET", "POST"])
 def show_homepage():
+    
+    this change will be reverted
+    
     return render_template(
         "home.html",
         item=MagicItemService.get(random.randrange(1, 363)),

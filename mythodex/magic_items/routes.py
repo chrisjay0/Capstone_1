@@ -1,4 +1,4 @@
-from app import app
+from app import app, connect_db
 
 @app.route('/test')
 def testroute():

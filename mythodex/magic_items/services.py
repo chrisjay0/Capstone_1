@@ -32,7 +32,7 @@ ITEM_TYPES = [
     "Weapon",
 ]
 
-from magic_items.forms import CollectionAddForm, ItemForm
+from magic_items.forms import CollectionAddForm, ItemForm, ItemFilterForm
 
 from magic_items.domains import (
     Collection as CollectionDomain,

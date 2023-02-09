@@ -2,7 +2,7 @@
 {% block content %}
 <h1>{{user.username}}</h1>
 {% if g.user.id == user.id %}
-    <a href="/user/edit?user_id={{user.id}}"><i class="fa-solid fa-pen-to-square fa-xl" style="color: black;"></i></a>
+    <a href="/users/edit?user_id={{user.id}}"><i class="fa-solid fa-pen-to-square fa-xl" style="color: black;"></i></a>
 {% endif %}
 <p><i>source: {{user.email}}</i></p>
     <p>{{user.bio}}</p>

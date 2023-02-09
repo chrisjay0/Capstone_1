@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from flask_bcrypt import Bcrypt
-from database.models import db
+from database import db
 
 bcrypt = Bcrypt()
 
@@ -44,11 +44,13 @@ class User(db.Model):
     )
 
     collections = db.relationship('Collection',
+        cascade="all,delete",
                             backref='User',)
 
     created_items = db.relationship(
         "MagicItem",
-        backref='created_by',)
+        cascade="all,delete",
+        backref='user_id',)
     
     date_created = db.Column(
         db.DateTime,

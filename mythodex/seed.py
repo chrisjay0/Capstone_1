@@ -1,4 +1,4 @@
-from database.models import db
+from database import db
 from app import app
 import time
 
@@ -38,8 +38,7 @@ db.session.commit()
 
 item_for_collection = ItemCollection(
         item_id=1,
-        collection_id=1,
-        times_on_collection=1,)
+        collection_id=1,)
 
 db.session.add(item_for_collection)
 db.session.commit()

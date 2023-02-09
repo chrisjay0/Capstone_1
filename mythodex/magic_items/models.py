@@ -1,6 +1,6 @@
 """SQLAlchemy models for Magic Items."""
 from datetime import datetime
-from database.models import db
+from database import db
     
 class ItemVariant(db.Model):
     """Mapping Magic Items to the Magic Item of which they are a variant."""
@@ -53,6 +53,8 @@ class MagicItem(db.Model):
 
     is_variant = db.Column(
         db.Boolean,
+        default=False,
+        
     )
 
     description = db.Column(
@@ -60,11 +62,10 @@ class MagicItem(db.Model):
         nullable=False,
     )
     
-    created_user_id = db.Column(
+    created_by = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="cascade"),
         nullable=True,
-        default=None,
     )
 
     source = db.Column(
@@ -114,8 +115,9 @@ class ItemCollection(db.Model):
         primary_key=True,
     )
     
-    times_on_collection = db.Column(
+    inventory = db.Column(
         db.Integer,
+        default=1,
     )
 
 class Collection(db.Model):
@@ -151,7 +153,7 @@ class Collection(db.Model):
         db.Integer,
         db.ForeignKey('users.id', 
                       ondelete='cascade',),
-        nullable=False,
+        nullable=True,
     )
 
     items = db.relationship('MagicItem',

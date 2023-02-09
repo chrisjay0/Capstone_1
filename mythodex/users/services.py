@@ -1,12 +1,12 @@
 from users.models import User, User as UserModel
 from users.domains import User as UserDomain
-from users.forms import UserEditForm
+from users.forms import UserEditForm, UserAddForm
 from datetime import datetime
 
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
-from database.models import db
+from database import db
 
 bcrypt = Bcrypt()
 
@@ -56,7 +56,28 @@ def edit_user(username, email, image_url, header_image_url, bio, password):
 #######################################
 # domain based services
 
-class UserServices:
+class UserService:
+    
+    @classmethod
+    def create(cls,
+               form: UserAddForm,
+               ) -> UserDomain:
+        
+        password = form.password.data
+        
+        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+
+        user_model = UserModel(
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_pwd,
+            image_url=form.image_url.data,
+        )
+        
+        db.session.add(user_model)
+        db.session.commit()
+        
+        return UserDomain.from_model(user_model)
     
     @classmethod
     def get_by_username(cls, username: str) -> 'UserDomain':
@@ -91,3 +112,22 @@ class UserServices:
             return UserDomain.from_model(user_model)
         
         return False
+    
+    @classmethod
+    def delete(cls,
+               user_id: int,
+               form: UserEditForm,
+               ) -> bool:
+
+        user_model = UserModel.query.get_or_404(user_id)
+        
+        password = form.password.data
+        
+        is_authorized = bcrypt.check_password_hash(
+            user_model.password, 
+            password)
+        
+        if is_authorized:
+            db.session.delete(user_model)
+            db.session.commit()
+            return True

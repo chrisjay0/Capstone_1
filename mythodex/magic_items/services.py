@@ -1,3 +1,4 @@
+from flask import abort
 from magic_items.models import (
     Collection as CollectionModel,
     ItemCollection as ItemCollectionModel,
@@ -117,7 +118,7 @@ class MagicItemService:
         item_model = MagicItemModel.query.get_or_404(magic_item_id)
 
         if item_model.created_by is not user_id:
-            return False
+            abort(403)
 
         db.session.delete(item_model)
         db.session.commit()
@@ -170,7 +171,7 @@ class CollectionService:
         collection_model = CollectionModel.query.get_or_404(collection_id)
 
         if collection_model.user_id is not user_id:
-            return None
+            abort(403)
         
         for k, v in form.data.items():
             if k != "csrf_token":
@@ -188,7 +189,7 @@ class CollectionService:
         collection_model = CollectionModel.query.get(collection_id)
 
         if collection_model.user_id is not user_id:
-            return False
+            abort(403)
 
         db.session.delete(collection_model)
         db.session.commit()
@@ -222,7 +223,7 @@ class CollectionService:
         cls,
         magic_item_id: int,
         collection_id: int,
-    ):
+    ) -> bool:
 
         item_collection_model = ItemCollectionModel.query.filter_by(
             item_id=magic_item_id,
@@ -236,38 +237,38 @@ class CollectionService:
             )
             db.session.add(new_item_collection_model)
             db.session.commit()
+            return True
 
         else:
             item_collection_model.inventory += 1
             db.session.commit()
+            return True
 
     @classmethod
     def reduce_magic_item(
         cls,
         magic_item_id: int,
         collection_id: int,
-    ):
+    ) -> bool:
 
         item_collection_model = ItemCollectionModel.query.filter_by(
             item_id=magic_item_id,
             collection_id=collection_id,
         ).first()
 
-        if not item_collection_model:
-            return False
-
-        if item_collection_model.inventory < 2:
-            return False
-
-        item_collection_model.inventory -= 1
-        db.session.commit()
+        if item_collection_model and item_collection_model.inventory > 1:
+            item_collection_model.inventory -= 1
+            db.session.commit()
+            return True
+        
+        return False
 
     @classmethod
     def remove_magic_item(
         cls,
         magic_item_id: int,
         collection_id: int,
-    ):
+    ) -> bool:
 
         item_collection_model = ItemCollectionModel.query.filter_by(
             item_id=magic_item_id,
@@ -279,6 +280,7 @@ class CollectionService:
 
         db.session.delete(item_collection_model)
         db.session.commit()
+        return True
 
     @classmethod
     def random(

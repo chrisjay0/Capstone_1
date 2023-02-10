@@ -1,11 +1,27 @@
  
-from flask import Blueprint, Flask, render_template, session, g, flash, redirect, request
+from flask import Blueprint, Flask, render_template, session, g, flash, redirect, request, abort
 from magic_items.services import MagicItemService, ItemForm, ItemFilterForm, CollectionAddForm, CollectionService, ItemCollectionService
 from users.services import UserService
 
-
-
 magic_routes = Blueprint('magic_routes', __name__)
+
+def before_manage_magic_items(func):
+    def wrapper(*args, **kwargs):
+        if not g.user:
+            flash('Please login or signup to manage magic items','warning')
+            return redirect('/login')
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__+wrapper.__name__
+    return wrapper
+
+def before_manage_collections(func):
+    def wrapper(*args, **kwargs):
+        if not g.user:
+            flash('Please login or signup to manage collections','warning')
+            return redirect('/login')
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__+wrapper.__name__
+    return wrapper
 
 
 #########################################################################################################
@@ -15,11 +31,8 @@ magic_routes = Blueprint('magic_routes', __name__)
 
 
 @magic_routes.route("/magic-items/new", methods=["GET", "POST"])
+@before_manage_magic_items
 def add_item():
-
-    if not g.user:
-        flash("Please login to create a new magic item", "danger")
-        return redirect("/login")
 
     form = ItemForm()
 
@@ -46,10 +59,11 @@ def show_item(item_id):
 
 @magic_routes.route("/magic-items", methods=["GET"])
 def show_items():
+    
     form = ItemFilterForm(object=request.args)
 
     if 'created_by' in request.args and request.args['created_by'] == '':
-        flash("Please login or signup to your magic items", "danger")
+        flash("Please login to manage magic items", "warning")
         return redirect("/login")
     
     
@@ -63,11 +77,8 @@ def show_items():
     )
 
 @magic_routes.route("/magic-items/edit", methods=["GET", "POST"])
+@before_manage_magic_items
 def edit_item():
-
-    if not g.user:
-        flash("Please login to create a new magic item", "danger")
-        return redirect("/login")
 
     magic_item_id = int(request.args["magic_item_id"])
     item = MagicItemService.get(magic_item_id)
@@ -88,11 +99,8 @@ def edit_item():
 
 
 @magic_routes.route("/magic-items/delete", methods=["POST"])
+@before_manage_magic_items
 def delete_item():
-
-    if not g.user:
-        flash("Please login to manage magic items", "danger")
-        return redirect("/login")
 
     magic_item_id = int(request.args["magic_item_id"])
     item = MagicItemService.get(magic_item_id)
@@ -118,11 +126,8 @@ def random_item():
 
 
 @magic_routes.route("/collections/new", methods=["GET", "POST"])
+@before_manage_collections
 def add_new_collection():
-
-    if not g.user:
-        flash("Please login to create a new collection", "danger")
-        return redirect("/login")
 
     form = CollectionAddForm()
 
@@ -175,11 +180,8 @@ def show_single_collection(collection_id):
 
 
 @magic_routes.route("/collections/edit", methods=["GET", "POST"])
+@before_manage_collections
 def edit_collection():
-
-    if not g.user:
-        flash("Please login to manage collections.", "danger")
-        return redirect("/login")
 
     collection_id = int(request.args["collection_id"])
     collection = CollectionService.get(collection_id)
@@ -207,11 +209,8 @@ def edit_collection():
 
 
 @magic_routes.route("/collections/add-item", methods=["POST"])
+@before_manage_collections
 def add_item_to_collection():
-
-    if not g.user:
-        flash("Please login to manage your collections", "danger")
-        return redirect("/login")
 
     magic_item_id = int(request.args["magic_item_id"])
     collection_id = int(request.args["collection_id"])
@@ -222,11 +221,8 @@ def add_item_to_collection():
 
 
 @magic_routes.route("/collections/reduce-item", methods=["POST"])
+@before_manage_collections
 def reduce_item_in_collection():
-
-    if not g.user:
-        flash("Please login to manage your collections", "danger")
-        return redirect("/login")
 
     magic_item_id = int(request.args["magic_item_id"])
     collection_id = int(request.args["collection_id"])
@@ -237,11 +233,8 @@ def reduce_item_in_collection():
 
 
 @magic_routes.route("/collections/remove-item", methods=["POST"])
+@before_manage_collections
 def remove_item_in_collection():
-
-    if not g.user:
-        flash("Please login to manage your collections", "danger")
-        return redirect("/login")
 
     magic_item_id = int(request.args["magic_item_id"])
     collection_id = int(request.args["collection_id"])
@@ -252,11 +245,8 @@ def remove_item_in_collection():
 
 
 @magic_routes.route("/collections/delete", methods=["POST"])
+@before_manage_collections
 def delete_collection():
-
-    if not g.user:
-        flash("Please login to manage your collections", "danger")
-        return redirect("/login")
 
     collection_id = int(request.args["collection_id"])
     collection = CollectionService.get(collection_id)

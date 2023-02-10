@@ -10,7 +10,6 @@ from magic_items.routes import magic_routes
 from users.routes import user_routes
 
 
-
 from database import connect_db
 
 from magic_items.services import (
@@ -35,14 +34,16 @@ app.config["SQLALCHEMY_ECHO"] = False
 app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
 app.config["SECRET_KEY"] = "SECRET"
 
-app.register_blueprint(magic_routes)
 app.register_blueprint(user_routes)
+app.register_blueprint(magic_routes)
 
 toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
 CURR_USER_KEY = 'curr user'
+
+
 
 
 ##############################################################################
@@ -62,6 +63,20 @@ def page_not_found(e):
     """404 NOT FOUND page."""
 
     return render_template("404.html"), 404
+
+
+@app.errorhandler(403)
+def page_not_autherized(e):
+    """403 NOT auth page."""
+
+    return render_template("403.html"), 403
+
+
+@app.errorhandler(405)
+def page_not_autherized(e):
+    """405 method not allowed."""
+
+    return render_template("405.html"), 405
 
 
 ##############################################################################

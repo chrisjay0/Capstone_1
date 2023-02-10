@@ -1,11 +1,8 @@
-from database import db
-from app import app
-import time
+import time, requests
 
 from users.models import User
 from magic_items.models import MagicItem, ItemVariant,  ItemCollection, Collection
-
-import requests
+from database import db
 
 db.drop_all()
 db.create_all()

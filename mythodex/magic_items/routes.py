@@ -1,26 +1,36 @@
- 
-from flask import Blueprint, Flask, render_template, session, g, flash, redirect, request, abort
-from magic_items.services import MagicItemService, ItemForm, ItemFilterForm, CollectionAddForm, CollectionService, ItemCollectionService
+from flask import Blueprint, render_template, g, flash, redirect, request
+from magic_items.services import (
+    MagicItemService,
+    ItemForm,
+    ItemFilterForm,
+    CollectionAddForm,
+    CollectionService,
+    ItemCollectionService,
+)
 from users.services import UserService
 
-magic_routes = Blueprint('magic_routes', __name__)
+magic_routes = Blueprint("magic_routes", __name__)
+
 
 def before_manage_magic_items(func):
     def wrapper(*args, **kwargs):
         if not g.user:
-            flash('Please login or signup to manage magic items','warning')
-            return redirect('/login')
+            flash("Please login or signup to manage magic items", "warning")
+            return redirect("/login")
         return func(*args, **kwargs)
-    wrapper.__name__ = func.__name__+wrapper.__name__
+
+    wrapper.__name__ = func.__name__ + wrapper.__name__
     return wrapper
+
 
 def before_manage_collections(func):
     def wrapper(*args, **kwargs):
         if not g.user:
-            flash('Please login or signup to manage collections','warning')
-            return redirect('/login')
+            flash("Please login or signup to manage collections", "warning")
+            return redirect("/login")
         return func(*args, **kwargs)
-    wrapper.__name__ = func.__name__+wrapper.__name__
+
+    wrapper.__name__ = func.__name__ + wrapper.__name__
     return wrapper
 
 
@@ -48,33 +58,40 @@ def add_item():
 
     return render_template("magic_items/new_magic_item.html", form=form)
 
+
 @magic_routes.route("/magic-items/<int:item_id>", methods=["GET"])
 def show_item(item_id):
     item = MagicItemService.get(item_id)
     if item.created_by:
         user = UserService.get_by_id(item.created_by)
-        return render_template("magic_items/magic_item.html", item=item, user=user,)
-    return render_template("magic_items/magic_item.html", item=item,)
+        return render_template(
+            "magic_items/magic_item.html",
+            item=item,
+            user=user,
+        )
+    return render_template(
+        "magic_items/magic_item.html",
+        item=item,
+    )
 
 
 @magic_routes.route("/magic-items", methods=["GET"])
 def show_items():
-    
+
     form = ItemFilterForm(object=request.args)
 
-    if 'created_by' in request.args and request.args['created_by'] == '':
+    if "created_by" in request.args and request.args["created_by"] == "":
         flash("Please login to manage magic items", "warning")
         return redirect("/login")
-    
-    
+
     items = MagicItemService.get_filtered(**request.args)
-        
 
     return render_template(
         "magic_items/magic_items.html",
         items=items,
         form=form,
     )
+
 
 @magic_routes.route("/magic-items/edit", methods=["GET", "POST"])
 @before_manage_magic_items
@@ -87,13 +104,15 @@ def edit_item():
 
     if form.validate_on_submit():
         try:
-            edited_item = MagicItemService.update(g.user.id,magic_item_id,form)
+            edited_item = MagicItemService.update(g.user.id, magic_item_id, form)
             flash("new item " + edited_item.name + " edited", "success")
             return redirect(f"/magic-items/{edited_item.id}")
 
         except:
             flash("error", "danger")
-            return render_template("magic_items/edit_magic_item.html", form=form, item=item)
+            return render_template(
+                "magic_items/edit_magic_item.html", form=form, item=item
+            )
 
     return render_template("magic_items/edit_magic_item.html", form=form, item=item)
 
@@ -110,8 +129,9 @@ def delete_item():
         return redirect(f"/magic-items?created_by={g.user.id}")
 
     MagicItemService.delete(g.user.id, magic_item_id)
-    flash(f'{item.name} has been deleted','success')
+    flash(f"{item.name} has been deleted", "success")
     return redirect(f"/magic-items?created_by={g.user.id}")
+
 
 @magic_routes.route("/magic-items/random", methods=["GET"])
 def random_item():
@@ -197,7 +217,7 @@ def edit_collection():
         )
 
     try:
-        collection = CollectionService.update(g.user.id,collection_id, form)
+        collection = CollectionService.update(g.user.id, collection_id, form)
         flash(f"Succesfully updated {collection.name}!", "success")
         return redirect(f"/collections/{collection.id}")
 
@@ -271,11 +291,14 @@ def random_collection():
 
 @magic_routes.route("/collections/random-item", methods=["GET"])
 def random_item_in_collection():
-    
-    collection_id = int(request.args['collection_id'])
-    
+
+    collection_id = int(request.args["collection_id"])
+
     item = CollectionService.random_item(collection_id)
     user = UserService.get_by_id(item.created_by)
-    
-    return render_template("magic_items/magic_item.html",item=item,user=user,)
 
+    return render_template(
+        "magic_items/magic_item.html",
+        item=item,
+        user=user,
+    )

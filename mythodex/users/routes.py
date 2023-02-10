@@ -1,13 +1,17 @@
- 
-from flask import Blueprint, Flask, render_template, session, g, flash, redirect, request
-from magic_items.services import MagicItemService, ItemForm, ItemFilterForm, CollectionAddForm, CollectionService, ItemCollectionService
+from flask import (
+    Blueprint,
+    Flask,
+    render_template,
+    session,
+    g,
+    flash,
+    redirect,
+    request,
+)
 from users.services import UserService, UserEditForm
-from sqlalchemy.exc import IntegrityError
 
 
-
-user_routes = Blueprint('user_routes', __name__)
-
+user_routes = Blueprint("user_routes", __name__)
 
 ##############################################################################
 # User Routes

@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, session, g, flash, redirect, request
+from flask import Flask, render_template, session, g, flash, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_modals import Modal
 import random
@@ -12,15 +12,10 @@ from users.routes import user_routes
 
 from database import connect_db
 
-from magic_items.services import (
-    CollectionService,
-    MagicItemService,
-    ItemCollectionService,
-)
+from magic_items.services import MagicItemService
 
-from magic_items.forms import CollectionAddForm, ItemFilterForm
-from users.forms import UserAddForm, UserEditForm, LoginForm, ListAddForm
-from users.services import signup_user, User, authenticate_user, UserService
+from users.forms import UserAddForm, LoginForm
+from users.services import User, authenticate_user, UserService
 
 app = Flask(__name__)
 modal = Modal(app)
@@ -41,13 +36,13 @@ toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
-CURR_USER_KEY = 'curr user'
+CURR_USER_KEY = "curr user"
 
 
-
-
-##############################################################################
-# Homepage and error pages
+#########################################################################################################
+#########################################################################################################
+##
+## Homepage and error pages
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -79,8 +74,10 @@ def page_not_autherized(e):
     return render_template("405.html"), 405
 
 
-##############################################################################
-# Login / Logout Routes
+#########################################################################################################
+#########################################################################################################
+##
+## Login / Logout Routes
 
 
 @app.before_request
@@ -148,91 +145,3 @@ def signup():
             return render_template("users/signup.html", form=form)
 
     return render_template("users/signup.html", form=form)
-
-
-# ##############################################################################
-# # User Routes
-
-
-# @app.route("/signup", methods=["GET", "POST"])
-# def signup():
-
-#     form = UserAddForm()
-
-#     if form.validate_on_submit():
-#         try:
-#             user = UserService.create(form)
-
-#             do_login(user)
-
-#             flash(f"Welcome to Mythodex {user.username}", "success")
-#             return redirect(f"/users/{user.id}")
-
-#         except IntegrityError:
-#             flash("Username already taken", "danger")
-#             return render_template("users/signup.html", form=form)
-
-#     return render_template("users/signup.html", form=form)
-
-
-# @app.route("/users/<int:user_id>")
-# def show_user(user_id):
-#     user = UserService.get_by_id(user_id)
-#     return render_template("users/user.html", user=user)
-
-
-# @app.route("/users/edit", methods=["GET", "POST"])
-# def edit_user():
-#     user_id = int(request.args["user_id"])
-
-#     if not g.user:
-#         flash("Please login to edit a profile.", "danger")
-#         return redirect("/login")
-
-#     if g.user.id != user_id:
-#         flash(
-#             f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
-#         )
-#         return redirect(f"/users/{g.user.id}")
-
-#     user = UserService.get_by_id(user_id)
-#     form = UserEditForm(obj=user)
-
-#     if not form.validate_on_submit():
-#         return render_template(f"/users/edit.html", user=user, form=form)
-
-#     try:
-#         user = UserService.update(user.id, form)
-#         flash(f"Succesfully updated profile", "success")
-#         return redirect(f"/users/{g.user.id}")
-#     except:
-#         flash(f"Unable to update profile", "error")
-#         return render_template(f"/users/edit.html", user=user, form=form)
-
-
-# @app.route("/users/delete", methods=["POST"])
-# def delete_user():
-
-#     if not g.user:
-#         flash("Please login to edit a profile.", "danger")
-#         return redirect("/login")
-
-#     user_id = int(request.args["user_id"])
-#     form = UserEditForm()
-
-#     if g.user.id != user_id:
-#         flash(
-#             f"{g.user.id} is not {user_id} Unauthorized to edit that profile.", "danger"
-#         )
-#         return redirect(f"/users/{g.user.id}")
-
-#     if not form.validate_on_submit():
-#         return redirect(f"/users/edit?user_id={g.user.id}")
-
-#     try:
-#         UserService.delete(user_id, form)
-#         flash(f"Your profile has been removed", "success")
-#         return redirect("/")
-#     except:
-#         flash(f"Unable to update profile", "error")
-#         return render_template(f"/users/edit.html", form=form)

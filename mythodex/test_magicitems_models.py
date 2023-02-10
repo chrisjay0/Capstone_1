@@ -1,11 +1,9 @@
 import os
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized_class
 from unittest import TestCase
-from sqlalchemy import exc
 
 
-
-os.environ['DATABASE_URL'] = "postgresql:///mythodex-test"
+os.environ["DATABASE_URL"] = "postgresql:///mythodex-test"
 
 
 from app import app
@@ -14,13 +12,33 @@ from database import db
 from users.models import User as UserModel
 from users.domains import User as UserDomain
 from users.services import UserService
-from magic_items.models import Collection as CollectionModel, MagicItem as MagicItemModel, ItemCollection as ItemCollectionModel
+from magic_items.models import (
+    Collection as CollectionModel,
+    MagicItem as MagicItemModel,
+    ItemCollection as ItemCollectionModel,
+)
+
 db.create_all()
 
 from params_test import paramslist
 
+
 @parameterized_class(
-    ('p_uid','p_username','p_email','p_password','p_cname','p_cdesc','p_iname','p_itype','p_irarity','p_idesc','p_icreatedby','p_isource'),paramslist
+    (
+        "p_uid",
+        "p_username",
+        "p_email",
+        "p_password",
+        "p_cname",
+        "p_cdesc",
+        "p_iname",
+        "p_itype",
+        "p_irarity",
+        "p_idesc",
+        "p_icreatedby",
+        "p_isource",
+    ),
+    paramslist,
 )
 class ModelTestCase(TestCase):
     """Test views for messages."""
@@ -31,9 +49,8 @@ class ModelTestCase(TestCase):
         db.create_all()
 
         u = UserModel(
-            username=self.p_username,
-            email=self.p_email,
-            password=self.p_password)
+            username=self.p_username, email=self.p_email, password=self.p_password
+        )
         u.id = self.p_uid
         db.session.add(u)
         db.session.commit()
@@ -48,12 +65,11 @@ class ModelTestCase(TestCase):
 
     def test_collection_model(self):
         """Does basic model work?"""
-        
+
         c = CollectionModel(
-            name = self.p_cname,
-            description = self.p_cdesc,
-            user_id = self.p_uid,
-            
+            name=self.p_cname,
+            description=self.p_cdesc,
+            user_id=self.p_uid,
         )
 
         db.session.add(c)
@@ -64,12 +80,12 @@ class ModelTestCase(TestCase):
 
     def test_magic_item_model(self):
         """Does basic model work?"""
-        
+
         m = MagicItemModel(
-            name = self.p_iname,
-            item_type = self.p_itype,
+            name=self.p_iname,
+            item_type=self.p_itype,
             rarity=self.p_irarity,
-            description= [f'{self.p_irarity}, {self.p_itype}',self.p_idesc],
+            description=[f"{self.p_irarity}, {self.p_itype}", self.p_idesc],
             source="user",
             created_by=self.p_uid,
         )
@@ -82,12 +98,11 @@ class ModelTestCase(TestCase):
 
     def test_item_collection_model(self):
         """Does basic model work?"""
-        
+
         c = CollectionModel(
-            name = self.p_cname,
-            description = self.p_cdesc,
-            user_id = self.p_uid,
-            
+            name=self.p_cname,
+            description=self.p_cdesc,
+            user_id=self.p_uid,
         )
 
         db.session.add(c)
@@ -95,15 +110,14 @@ class ModelTestCase(TestCase):
 
         self.assertEqual(len(self.u.collections), 1)
         self.assertEqual(self.u.collections[0].name, self.p_cname)
-        
+
         m = MagicItemModel(
-            name = self.p_iname,
-            item_type = self.p_itype,
+            name=self.p_iname,
+            item_type=self.p_itype,
             rarity=self.p_irarity,
-            description= [f'{self.p_irarity}, {self.p_itype}',self.p_idesc],
+            description=[f"{self.p_irarity}, {self.p_itype}", self.p_idesc],
             source="user",
             created_by=self.p_uid,
-            
         )
 
         db.session.add(m)
@@ -111,10 +125,10 @@ class ModelTestCase(TestCase):
 
         self.assertEqual(len(self.u.created_items), 1)
         self.assertEqual(self.u.created_items[0].name, self.p_iname)
-        
+
         ic = ItemCollectionModel(
-            item_id = self.u.created_items[0].id,
-            collection_id = self.u.collections[0].id,
+            item_id=self.u.created_items[0].id,
+            collection_id=self.u.collections[0].id,
         )
 
         db.session.add(ic)

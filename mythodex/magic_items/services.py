@@ -18,7 +18,8 @@ ITEM_RARITY = [
     "Uncommon",
     "Rare",
     "Very Rare",
-    "Legendary",]
+    "Legendary",
+]
 
 ITEM_TYPES = [
     "Scroll",
@@ -49,12 +50,19 @@ from magic_items.domains import (
 class MagicItemService:
     @classmethod
     def create(cls, user_id: int, form: ItemForm) -> MagicItemDomain:
-        
-        data = {k: v for k, v in form.data.items() if k != "csrf_token" and k != "description"}
+
+        data = {
+            k: v
+            for k, v in form.data.items()
+            if k != "csrf_token" and k != "description"
+        }
 
         item_model = MagicItemModel(
             **data,
-            description= [f'{form.rarity.data}, {form.item_type.data}',form.description.data],
+            description=[
+                f"{form.rarity.data}, {form.item_type.data}",
+                form.description.data,
+            ],
             source="user",
             created_by=user_id,
         )
@@ -77,13 +85,12 @@ class MagicItemService:
         cls,
         **filters: dict,
     ) -> List[MagicItemDomain]:
-        
+
         edited_filter = {}
-        
+
         for filter in filters:
-            if filters[filter] is not '':
+            if filters[filter] is not "":
                 edited_filter.update({filter: filters[filter]})
-                
 
         model_magic_items = MagicItemModel.query.filter_by(**edited_filter).all()
         domain_magic_items = []
@@ -95,17 +102,18 @@ class MagicItemService:
         return domain_magic_items
 
     @classmethod
-    def update(
-        cls, user_id: int, magic_item_id: int, form: ItemForm
-    ):
+    def update(cls, user_id: int, magic_item_id: int, form: ItemForm):
 
         item_model = MagicItemModel.query.get_or_404(magic_item_id)
-        
+
         for k, v in form.data.items():
             if k != "csrf_token" and k != "description":
-                setattr(item_model,k,v)
-            
-        item_model.description=  f'{form.rarity.data}, {form.item_type.data}',form.description.data,
+                setattr(item_model, k, v)
+
+        item_model.description = (
+            f"{form.rarity.data}, {form.item_type.data}",
+            form.description.data,
+        )
         item_model.last_updated = datetime.utcnow()
 
         db.session.commit()
@@ -129,13 +137,17 @@ class MagicItemService:
         cls,
     ) -> MagicItemDomain:
 
-        item_model = MagicItemModel.query.options(load_only('id')).offset(
-            func.floor(
-                func.random() *
-                db.session.query(func.count(MagicItemModel.id))
+        item_model = (
+            MagicItemModel.query.options(load_only("id"))
+            .offset(
+                func.floor(
+                    func.random() * db.session.query(func.count(MagicItemModel.id))
                 )
-            ).limit(1).all()[0]
-        
+            )
+            .limit(1)
+            .all()[0]
+        )
+
         return MagicItemDomain.from_model(item_model)
 
 
@@ -146,8 +158,7 @@ class CollectionService:
         user_id: int,
         form: CollectionAddForm,
     ) -> CollectionDomain:
-        
-        
+
         data = {k: v for k, v in form.data.items() if k != "csrf_token"}
 
         collection_model = CollectionModel(
@@ -172,11 +183,11 @@ class CollectionService:
 
         if collection_model.user_id is not user_id:
             abort(403)
-        
+
         for k, v in form.data.items():
             if k != "csrf_token":
-                setattr(collection_model,k,v)
-                
+                setattr(collection_model, k, v)
+
         collection_model.last_updated = datetime.utcnow()
 
         db.session.commit()
@@ -260,7 +271,7 @@ class CollectionService:
             item_collection_model.inventory -= 1
             db.session.commit()
             return True
-        
+
         return False
 
     @classmethod
@@ -286,15 +297,18 @@ class CollectionService:
     def random(
         cls,
     ) -> CollectionDomain:
-    
 
-        collection_model = CollectionModel.query.options(load_only('id')).offset(
+        collection_model = (
+            CollectionModel.query.options(load_only("id"))
+            .offset(
                 func.floor(
-                    func.random() *
-                    db.session.query(func.count(CollectionModel.id))
+                    func.random() * db.session.query(func.count(CollectionModel.id))
                 )
-            ).limit(1).all()[0]
-        
+            )
+            .limit(1)
+            .all()[0]
+        )
+
         return CollectionDomain.from_model(collection_model)
 
     @classmethod
@@ -302,11 +316,11 @@ class CollectionService:
         cls,
         collection_id: int,
     ) -> MagicItemDomain:
-        
+
         item_collection_models = ItemCollectionModel.query.filter_by(
             collection_id=collection_id
         ).all()
-        
+
         rand_inventory = []
 
         for item in item_collection_models:
@@ -314,11 +328,11 @@ class CollectionService:
             while i > 0:
                 rand_inventory.append(item)
                 i -= i
-        
+
         item_id = random.choice(rand_inventory).item_id
-        
+
         item_model = MagicItemModel.query.get(item_id)
-        
+
         return MagicItemDomain.from_model(item_model)
 
 

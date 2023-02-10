@@ -6,10 +6,11 @@ from database import db
 
 bcrypt = Bcrypt()
 
+
 class User(db.Model):
     """User in the system."""
 
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = db.Column(
         db.Integer,
@@ -43,21 +44,24 @@ class User(db.Model):
         nullable=False,
     )
 
-    collections = db.relationship('Collection',
+    collections = db.relationship(
+        "Collection",
         cascade="all,delete",
-                            backref='User',)
+        backref="User",
+    )
 
     created_items = db.relationship(
         "MagicItem",
         cascade="all,delete",
-        backref='user_id',)
-    
+        backref="user_id",
+    )
+
     date_created = db.Column(
         db.DateTime,
         nullable=False,
         default=datetime.utcnow(),
     )
-    
+
     last_updated = db.Column(
         db.DateTime,
         nullable=False,
@@ -66,6 +70,3 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
-
-
-

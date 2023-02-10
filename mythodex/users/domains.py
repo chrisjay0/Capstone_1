@@ -4,6 +4,7 @@ from datetime import datetime
 from magic_items.domains import Collection, MagicItem
 from users.models import User as UserModel
 
+
 @dataclass
 class User:
     id: int
@@ -16,9 +17,9 @@ class User:
     created_items: List[MagicItem]
     date_created: datetime
     last_updated: datetime
-    
+
     @classmethod
-    def from_model(cls, model_instance: UserModel) -> 'User':
+    def from_model(cls, model_instance: UserModel) -> "User":
         return cls(
             id=model_instance.id,
             username=model_instance.username,
@@ -30,8 +31,8 @@ class User:
             created_items=model_instance.created_items,
             date_created=model_instance.date_created,
             last_updated=model_instance.last_updated,
-    )
-    
+        )
+
     @classmethod
     def udate(cls) -> bool:
         try:

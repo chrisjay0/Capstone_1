@@ -26,7 +26,14 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-app.config["SECRET_KEY"] = "SECRET"
+app.config["SECRET_KEY"] = os.environ('SECRET_KEY','secret5231')
+print('*************************************')
+print('*************************************')
+print('*************************************')
+print(app.config["SECRET_KEY"])
+print('*************************************')
+print('*************************************')
+print('*************************************')
 
 app.register_blueprint(user_routes)
 app.register_blueprint(magic_routes)

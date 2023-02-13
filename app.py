@@ -20,8 +20,13 @@ from users.services import User, authenticate_user, UserService
 app = Flask(__name__)
 modal = Modal(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+HEROKU_URI = 'postgresql'+os.environ.get('DATABASE_URL')[8:]
+
+if HEROKU_URI:
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     'DATABASE_URL', 'postgresql:///mythodex')
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql:///mythodex'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False

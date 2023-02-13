@@ -12,21 +12,10 @@ from users.services import UserService
 magic_routes = Blueprint("magic_routes", __name__)
 
 
-def before_manage_magic_items(func):
+def before_manage_content(func):
     def wrapper(*args, **kwargs):
         if not g.user:
-            flash("Please login or signup to manage magic items", "warning")
-            return redirect("/login")
-        return func(*args, **kwargs)
-
-    wrapper.__name__ = func.__name__ + wrapper.__name__
-    return wrapper
-
-
-def before_manage_collections(func):
-    def wrapper(*args, **kwargs):
-        if not g.user:
-            flash("Please login or signup to manage collections", "warning")
+            flash("Please login or signup to manage collections, and magic items", "warning")
             return redirect("/login")
         return func(*args, **kwargs)
 
@@ -41,7 +30,7 @@ def before_manage_collections(func):
 
 
 @magic_routes.route("/magic-items/new", methods=["GET", "POST"])
-@before_manage_magic_items
+@before_manage_content
 def add_item():
 
     form = ItemForm()
@@ -94,7 +83,7 @@ def show_items():
 
 
 @magic_routes.route("/magic-items/edit", methods=["GET", "POST"])
-@before_manage_magic_items
+@before_manage_content
 def edit_item():
 
     magic_item_id = int(request.args["magic_item_id"])
@@ -118,7 +107,7 @@ def edit_item():
 
 
 @magic_routes.route("/magic-items/delete", methods=["POST"])
-@before_manage_magic_items
+@before_manage_content
 def delete_item():
 
     magic_item_id = int(request.args["magic_item_id"])
@@ -146,7 +135,7 @@ def random_item():
 
 
 @magic_routes.route("/collections/new", methods=["GET", "POST"])
-@before_manage_collections
+@before_manage_content
 def add_new_collection():
 
     form = CollectionAddForm()
@@ -200,7 +189,7 @@ def show_single_collection(collection_id):
 
 
 @magic_routes.route("/collections/edit", methods=["GET", "POST"])
-@before_manage_collections
+@before_manage_content
 def edit_collection():
 
     collection_id = int(request.args["collection_id"])
@@ -229,7 +218,7 @@ def edit_collection():
 
 
 @magic_routes.route("/collections/add-item", methods=["POST"])
-@before_manage_collections
+@before_manage_content
 def add_item_to_collection():
 
     magic_item_id = int(request.args["magic_item_id"])
@@ -241,7 +230,7 @@ def add_item_to_collection():
 
 
 @magic_routes.route("/collections/reduce-item", methods=["POST"])
-@before_manage_collections
+@before_manage_content
 def reduce_item_in_collection():
 
     magic_item_id = int(request.args["magic_item_id"])
@@ -253,7 +242,7 @@ def reduce_item_in_collection():
 
 
 @magic_routes.route("/collections/remove-item", methods=["POST"])
-@before_manage_collections
+@before_manage_content
 def remove_item_in_collection():
 
     magic_item_id = int(request.args["magic_item_id"])
@@ -265,7 +254,7 @@ def remove_item_in_collection():
 
 
 @magic_routes.route("/collections/delete", methods=["POST"])
-@before_manage_collections
+@before_manage_content
 def delete_collection():
 
     collection_id = int(request.args["collection_id"])

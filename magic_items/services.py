@@ -34,6 +34,9 @@ ITEM_TYPES = [
     "Weapon",
 ]
 
+CSRF_TOKEN = 'csrf_token'
+DESCRIPTION = 'description'
+
 from magic_items.forms import CollectionAddForm, ItemForm, ItemFilterForm
 
 from magic_items.domains import (
@@ -54,7 +57,7 @@ class MagicItemService:
         data = {
             k: v
             for k, v in form.data.items()
-            if k != "csrf_token" and k != "description"
+            if k != CSRF_TOKEN and k != DESCRIPTION
         }
 
         item_model = MagicItemModel(
@@ -107,7 +110,7 @@ class MagicItemService:
         item_model = MagicItemModel.query.get_or_404(magic_item_id)
 
         for k, v in form.data.items():
-            if k != "csrf_token" and k != "description":
+            if k != CSRF_TOKEN and k != DESCRIPTION:
                 setattr(item_model, k, v)
 
         item_model.description = (
@@ -159,7 +162,7 @@ class CollectionService:
         form: CollectionAddForm,
     ) -> CollectionDomain:
 
-        data = {k: v for k, v in form.data.items() if k != "csrf_token"}
+        data = {k: v for k, v in form.data.items() if k != CSRF_TOKEN}
 
         collection_model = CollectionModel(
             **data,
@@ -185,7 +188,7 @@ class CollectionService:
             abort(403)
 
         for k, v in form.data.items():
-            if k != "csrf_token":
+            if k != CSRF_TOKEN:
                 setattr(collection_model, k, v)
 
         collection_model.last_updated = datetime.utcnow()

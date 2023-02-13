@@ -21,12 +21,14 @@ class MagicItem:
     item_type: str
     rarity: str
     is_variant: bool
+    ## The descriptions are stored as a list of strings for easier formatting on the front end
     description: List[str]
     created_by: int
     source: str
     date_created: datetime
     last_updated: datetime
 
+    ## The first description item is a rarity/type blurb so for the small bootstrap card preview the second item is used
     @property
     def shorten_description(self):
         desc = self.description[1]

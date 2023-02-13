@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Magic Items</h1>
+<div class="container">Filter by:
+    <form method="GET" id="filter_form">
+
+      {% for field in form %}
+        {% for error in field.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+        {{ field(placeholder=field.label.text, class="form-control") }}
+      {% endfor %}
+      <a href="/magic-items"  class="btn btn-outline-secondary">Clear Filters</a>
+      <button class="btn btn-outline-info">Filter</button>
+    </form>
+</div>
+<div class="container p-3">
+    <div class="row gy-3 row-cols-auto">
+        {% for item in items %}
+            <div class="col">{% include 'magic_items/magic_item_card.html' %}</div>
+        {% endfor %}
+    </div>
+  </div>
+  {% endblock %}

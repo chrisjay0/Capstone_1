@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{item.name}}</h1>
+    {% if g.user.id == item.created_by %}
+        <a href="/magic-items/edit?magic_item_id={{item.id}}"><i class="fa-solid fa-pen-to-square fa-xl"
+                style="color: black;"></i></a>
+    {% endif %}
+    <div class="col-4 dropdown">
+        <a href="#" style="color: black;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-plus fa-xl"></i>
+        </a>
+        <ul class="dropdown-menu">
+
+            {% if not g.user %}
+                <li><span class="dropdown-item disabled">Please login or signup to <br> add this item to a
+                        collection</span>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="/signup">Sign up</a></li>
+                <li><a class="dropdown-item" href="/login">Log in</a></li>
+            {% else %}
+
+            <li><span class="dropdown-item disabled">Add item to which collection?</span>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            {% for collection in g.user.collections %}
+            <li>
+                <form action="/collections/add-item?magic_item_id={{item.id}}&collection_id={{collection.id}}"
+                    method="post">
+                    <button type="submit" class="dropdown-item">{{collection.name}}</button>
+                </form>
+            </li>
+            {% endfor %}
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li>
+                <a class="dropdown-item" href="/collections/new?magic_item_id={{item.id}}">Create a new
+                    collection!</a>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    <p><i>
+            {% if item.created_by %}created by: <a href="/users/{{user.id}}">{{ user.username }}</a>{% else %}from D&D 5e
+            SRD via <a href="http://dnd5eapi.co">dnd5eapi.co</a>{% endif %}
+        </i></p>
+    {% for description_line in item.description %}
+    <p>{{description_line}}</p>
+    {% endfor %}
+{% endblock %}

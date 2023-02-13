@@ -1,0 +1,57 @@
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h5 class="card-title">
+            {{ collection.shorten_title }}</h5>
+        <p class="card-text">{{collection.shorten_description}}</p>
+        <div class="row align-items-end">
+            <div class="col-7 align-items-start">
+                <a href="/collections/{{collection.id}}" class="btn btn-primary btn-sm">See collection</a>
+            </div>
+            <div class="col-5">
+                <div class="row justify-content-end">
+                    <div class="col-4"><i class="fa-solid fa-share-from-square fa-xl"></i></div>
+                    {% if g.user.id == collection.user_id %}
+                        <div class="col-4">
+                            <a href="/collections/edit?collection_id={{collection.id}}"><i class="fa-solid fa-pen-to-square fa-xl" style="color: black;"></i></a></div>
+                    {% endif %}
+                    <!-- <div class="col-4 dropdown">
+                            <a href="#" style="color: black;" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="fa-solid fa-plus fa-xl"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+
+                                {% if not g.user %}
+                                <li><span class="dropdown-item disabled">Please login or signup to <br> add this item to a collection</span>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/signup">Sign up</a></li>
+                                <li><a class="dropdown-item" href="/login">Log in</a></li>
+                                {% else %}
+                                <li><span class="dropdown-item disabled">Add item to which collection?</span>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                {% for collection in g.user.lists %}
+                                <li>
+                                    <a class="dropdown-item" href="/my-lists/{{ list.id }}/add-item/{{id}}">{{list.name}}</a>
+                                </li>
+                                {% endfor %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/my-lists/add-list">Create a new list!</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

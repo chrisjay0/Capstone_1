@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container p-3">
+    <div class="row row-cols-auto">
+        {% for collection in collections %}
+            <div class="col">{% include 'magic_items/collection_card.html' %}</div>
+        {% endfor %}
+    </div>
+  </div>
+{% endblock %}

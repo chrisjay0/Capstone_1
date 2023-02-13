@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div class="row justify-content-md-center">
+  <div class="col-md-7 col-lg-5">
+    <h2 class="join-message">Add a new list!</h2>
+    <form method="POST" id="list_form">
+      {{ form.hidden_tag() }}
+
+      {% for field in form if field.widget.input_type != 'hidden' %}
+        {% for error in field.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+        {{ field(placeholder=field.label.text, class="form-control") }}
+      {% endfor %}
+      <a href='#' class="btn btn-outline-danger" data-bs-toggle="modal" style="color: black;" data-bs-target="#deleteItemWarningModal">Delete</a>
+      <a href="/magic-items/{{item.id}}"  class="btn btn-outline-secondary">Cancel</a>
+
+      <button class="btn btn-primary">Update</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="deleteItemWarningModal" tabindex="-1" aria-labelledby="deleteItemWarningModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-danger" id="deleteItemWarningModalLabel">Delete collection</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Do you really want to delete the {{ item.name }} collection permanently?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <form method="POST"
+                action="/magic-items/delete?magic_item_id={{item.id}}">
+            <button class="btn btn-outline-danger">Delete {{ item.name }} permanently</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

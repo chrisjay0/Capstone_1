@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{collection.name}}</h1>
+    <i class="fa-solid fa-share-from-square fa-xl"></i>
+    {% if g.user.id == collection.user_id %}
+        <a href="/collections/edit?collection_id={{collection.id}}"><i class="fa-solid fa-pen-to-square fa-xl" style="color: black;"></i></a>
+        <a href='#' class="fa-solid fa-trash-can fa-xl" data-bs-toggle="modal" style="color: black;" data-bs-target="#deletecollectionWarningModal"></a>
+    {% endif %}
+    <p>
+      <a href='/collections/random-item?collection_id={{collection.id}}'>Pick random Item</a></p>
+<p>{{collection.description}}</p>
+<div class="container p-3">
+    <div class="row row-cols-auto">
+        {% for item in collection.items %}
+            <div class="col">{% include 'magic_items/magic_item_card.html' %}</div>
+        {% endfor %}
+    </div>
+  </div>
+
+
+<!-- Delete Confirm Modal -->
+<div class="modal fade" id="deletecollectionWarningModal" tabindex="-1" aria-labelledby="deletecollectionWarningModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-danger" id="deletecollectionWarningModalLabel">Delete collection</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Do you really want to delete the {{ collection.name }} collection permanently?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <form method="POST"
+                action="/collections/delete?collection_id={{collection.id}}">
+            <button class="btn btn-outline-danger">Delete {{ collection.name }} permanently</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

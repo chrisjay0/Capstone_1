@@ -4,8 +4,7 @@ from flask import Flask, render_template, session, g, flash, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 import random
 from sqlalchemy.exc import IntegrityError
-# from flask_modals import Modal
-
+from flask_modals import Modal
 
 from magic_items.routes import magic_routes
 from users.routes import user_routes
@@ -19,7 +18,7 @@ from users.forms import UserAddForm, LoginForm
 from users.services import User, authenticate_user, UserService
 
 app = Flask(__name__)
-# modal = Modal(app)
+modal = Modal(app)
 
 HEROKU_URI = 'postgresql'+os.environ.get('DATABASE_URL')[8:]
 

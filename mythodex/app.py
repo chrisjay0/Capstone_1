@@ -2,9 +2,9 @@ import os
 
 from flask import Flask, render_template, session, g, flash, redirect
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_modals import Modal
 import random
 from sqlalchemy.exc import IntegrityError
-from flask_modals import Modal
 
 from magic_items.routes import magic_routes
 from users.routes import user_routes
@@ -20,25 +20,13 @@ from users.services import User, authenticate_user, UserService
 app = Flask(__name__)
 modal = Modal(app)
 
-HEROKU_URI = 'postgresql'+os.environ.get('DATABASE_URL')[8:]
-
-if HEROKU_URI:
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     'DATABASE_URL', 'postgresql:///mythodex')
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql:///mythodex'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY','secret5231')
-print('*************************************')
-print('*************************************')
-print('*************************************')
-print(app.config["SECRET_KEY"])
-print('*************************************')
-print('*************************************')
-print('*************************************')
+app.config["SECRET_KEY"] = "SECRET"
 
 app.register_blueprint(user_routes)
 app.register_blueprint(magic_routes)

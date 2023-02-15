@@ -1,20 +1,19 @@
 import time, requests
-from app import create_app
-
-app = create_app()
-app.app_context().push()
+from app import app
 
 from users.models import User
 from magic_items.models import MagicItem, ItemVariant, ItemCollection, Collection
 from database import db
 
-db.drop_all()
-db.create_all()
+with app.app_context():
+    db.drop_all()
+    db.create_all()
 
 user = User(username="test", email="test@test.com", bio="test bio", password="pass")
 
-db.session.add(user)
-db.session.commit()
+with app.app_context():
+    db.session.add(user)
+    db.session.commit()
 
 item = MagicItem(
     name="test item",
@@ -24,8 +23,10 @@ item = MagicItem(
     source="test",
 )
 
-db.session.add(item)
-db.session.commit()
+
+with app.app_context():
+    db.session.add(item)
+    db.session.commit()
 
 u_collection = Collection(
     name="test collection",
@@ -33,16 +34,21 @@ u_collection = Collection(
     description="test desc",
 )
 
-db.session.add(u_collection)
-db.session.commit()
+
+with app.app_context():
+    db.session.add(u_collection)
+    db.session.commit()
 
 item_for_collection = ItemCollection(
     item_id=1,
     collection_id=1,
 )
 
-db.session.add(item_for_collection)
-db.session.commit()
+
+
+with app.app_context():
+    db.session.add(item_for_collection)
+    db.session.commit()
 
 res = requests.get("https://www.dnd5eapi.co/api/magic-items/adamantine-armor/").json()
 
@@ -76,8 +82,10 @@ for result in res.get("results"):
         source="dnd5eapi",
     )
 
-    db.session.add(item)
-    db.session.commit()
+    
+    with app.app_context(): 
+        db.session.add(item)
+        db.session.commit()
     time.sleep(0.5)
 
 
@@ -91,5 +99,6 @@ for variant_index in variant_indexing_collection:
         variant_item_id=variant_id,
     )
 
-    db.session.add(variant_map)
-    db.session.commit()
+    with app.app_context():
+        db.session.add(variant_map)
+        db.session.commit()

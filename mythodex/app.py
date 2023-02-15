@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, session, g, flash, redirect
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_modals import Modal
+# from flask_modals import Modal
 import random
 from sqlalchemy.exc import IntegrityError
 
@@ -18,7 +18,7 @@ from users.forms import UserAddForm, LoginForm
 from users.services import User, authenticate_user, UserService
 
 app = Flask(__name__)
-modal = Modal(app)
+# modal = Modal(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     'DATABASE_URL', 'postgresql:///mythodex')

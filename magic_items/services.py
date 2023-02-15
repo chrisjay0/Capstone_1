@@ -89,7 +89,7 @@ class MagicItemService:
         edited_filter = {}
 
         for filter in filters:
-            if filters[filter] is not "":
+            if filters[filter] != "":
                 edited_filter.update({filter: filters[filter]})
 
         model_magic_items = MagicItemModel.query.filter_by(**edited_filter).all()

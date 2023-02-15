@@ -1,13 +1,15 @@
 import time, requests
-from app import app
+from app import create_app
+
+app = create_app()
+app.app_context().push()
 
 from users.models import User
 from magic_items.models import MagicItem, ItemVariant, ItemCollection, Collection
 from database import db
 
-with app.app_context():
-    db.drop_all()
-    db.create_all()
+db.drop_all()
+db.create_all()
 
 user = User(username="test", email="test@test.com", bio="test bio", password="pass")
 

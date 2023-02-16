@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, g, flash, redirect, request
+from flask import Blueprint, render_template, g, flash, redirect, request, abort
 from magic_items.services import (
     MagicItemService,
     ItemForm,
@@ -6,6 +6,7 @@ from magic_items.services import (
     CollectionAddForm,
     CollectionService,
     ItemCollectionService,
+    MagicItemFlashMessage
 )
 from users.services import UserService
 
@@ -15,7 +16,7 @@ magic_routes = Blueprint("magic_routes", __name__)
 def before_manage_magic_items(func):
     def wrapper(*args, **kwargs):
         if not g.user:
-            flash("Please login or signup to manage magic items", "warning")
+            flash(**MagicItemFlashMessage.login_to_manage)
             return redirect("/login")
         return func(*args, **kwargs)
 
@@ -26,7 +27,7 @@ def before_manage_magic_items(func):
 def before_manage_collections(func):
     def wrapper(*args, **kwargs):
         if not g.user:
-            flash("Please login or signup to manage collections", "warning")
+            flash(**MagicItemFlashMessage.login_to_manage)
             return redirect("/login")
         return func(*args, **kwargs)
 
@@ -49,7 +50,7 @@ def add_item():
     if form.validate_on_submit():
         try:
             item = MagicItemService.create(g.user.id, form)
-            flash("new item " + item.name + " added", "success")
+            flash(**MagicItemFlashMessage.create_success(item.name))
             return redirect(f"/magic-items/{item.id}")
 
         except:
@@ -125,10 +126,14 @@ def delete_item():
     item = MagicItemService.get(magic_item_id)
 
     if g.user.id is not item.created_by:
-        flash("Not authorized to make changes to that magic item", "danger")
+        flash(**MagicItemFlashMessage.unauth)
         return redirect(f"/magic-items?created_by={g.user.id}")
 
-    MagicItemService.delete(g.user.id, magic_item_id)
+    try:
+        MagicItemService.delete(g.user.id, magic_item_id)
+    except:
+        flash(f"{item.name} has been deleted", "danger")
+        abort(403)
     flash(f"{item.name} has been deleted", "success")
     return redirect(f"/magic-items?created_by={g.user.id}")
 

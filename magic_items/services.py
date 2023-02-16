@@ -13,6 +13,8 @@ import random
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 
+UNAUTH_MSG = "Not authorized to make changes to that magic item", "danger"
+
 ITEM_RARITY = [
     "Common",
     "Uncommon",
@@ -46,6 +48,23 @@ from magic_items.domains import (
 #######################
 ## New services using domain classes
 
+
+class MagicItemFlashMessage:
+    unauth = {
+        "message": "Not authorized to make changes to that magic item",
+        "category": "danger",
+    }
+    login_to_manage = {
+        "message": "Please login or signup to manage magic items",
+        "category": "warning",
+    }
+    
+    @classmethod
+    def create_success(cls, item_name:str,) -> dict:
+        return {
+        "message": f"New item {item_name} added!",
+        "category": "success",
+    }
 
 class MagicItemService:
     @classmethod
@@ -126,11 +145,10 @@ class MagicItemService:
         item_model = MagicItemModel.query.get_or_404(magic_item_id)
 
         if item_model.created_by is not user_id:
-            abort(403)
+            raise Exception("User not authorized")
 
         db.session.delete(item_model)
         db.session.commit()
-        return True
 
     @classmethod
     def random(

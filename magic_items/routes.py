@@ -64,6 +64,7 @@ def add_item():
 def show_item(item_id):
     item = MagicItemService.get(item_id)
     if item.created_by:
+        # TODO: Right now a circular import error prevents the item domain from having an attr User. So there isn't a way to use the relationship set up in the db forcing us to make a second query. Is there a way around this?
         user = UserService.get_by_id(item.created_by)
         return render_template(
             "magic_items/magic_item.html",

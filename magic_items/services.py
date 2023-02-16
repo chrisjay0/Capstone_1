@@ -1,4 +1,4 @@
-from flask import abort
+
 from magic_items.models import (
     Collection as CollectionModel,
     ItemCollection as ItemCollectionModel,
@@ -13,7 +13,7 @@ import random
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 
-UNAUTH_MSG = "Not authorized to make changes to that magic item", "danger"
+UNAUTH_MSG = "User not authorized"
 
 ITEM_RARITY = [
     "Common",
@@ -145,7 +145,7 @@ class MagicItemService:
         item_model = MagicItemModel.query.get_or_404(magic_item_id)
 
         if item_model.created_by is not user_id:
-            raise Exception("User not authorized")
+            raise Exception(UNAUTH_MSG)
 
         db.session.delete(item_model)
         db.session.commit()
@@ -200,7 +200,7 @@ class CollectionService:
         collection_model = CollectionModel.query.get_or_404(collection_id)
 
         if collection_model.user_id is not user_id:
-            abort(403)
+            raise Exception(UNAUTH_MSG)
 
         for k, v in form.data.items():
             if k != "csrf_token":
@@ -213,16 +213,15 @@ class CollectionService:
         return CollectionDomain.from_model(collection_model)
 
     @classmethod
-    def delete(cls, collection_id: int, user_id: int) -> bool:
+    def delete(cls, collection_id: int, user_id: int):
 
         collection_model = CollectionModel.query.get(collection_id)
 
         if collection_model.user_id is not user_id:
-            abort(403)
+            raise Exception(UNAUTH_MSG)
 
         db.session.delete(collection_model)
         db.session.commit()
-        return True
 
     @classmethod
     def get(

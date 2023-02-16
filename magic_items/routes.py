@@ -98,6 +98,12 @@ def show_items():
 @before_manage_magic_items
 def edit_item():
 
+    # TODO: Currently the magic is fetched here for 3 uses:
+    #   - to feed it's data into the form so the user does not need to start from scratch
+    #   - to send the object to the edit_magic_item.html template
+    #   - to grab the second description item in the item list
+    #       (may be unneccesary after adjusting confusing item domain description property)
+    #   Is there a better way to solve the above problems, or document the code to make it clearer?
     magic_item_id = int(request.args["magic_item_id"])
     item = MagicItemService.get(magic_item_id)
     item.description = item.description[1]
@@ -122,6 +128,10 @@ def edit_item():
 @before_manage_magic_items
 def delete_item():
 
+    # TODO: Currently the magic is fetched here for 2 uses:
+    #   - to check if g.user is the owner
+    #   - to capture the name for a confirmation message
+    #   Is there a better way to solve the above problems, or document the code to make it clearer?
     magic_item_id = int(request.args["magic_item_id"])
     item = MagicItemService.get(magic_item_id)
 
@@ -131,11 +141,11 @@ def delete_item():
 
     try:
         MagicItemService.delete(g.user.id, magic_item_id)
+        flash(f"{item.name} has been deleted", "success")
+        return redirect(f"/magic-items?created_by={g.user.id}")
     except:
-        flash(f"{item.name} has been deleted", "danger")
+        flash(**MagicItemFlashMessage.unauth)
         abort(403)
-    flash(f"{item.name} has been deleted", "success")
-    return redirect(f"/magic-items?created_by={g.user.id}")
 
 
 @magic_routes.route("/magic-items/random", methods=["GET"])
@@ -184,6 +194,7 @@ def add_new_collection():
 @magic_routes.route("/collections", methods=["GET"])
 def show_collections():
 
+    # TODO: Using request args to test if someone attempted to look at 'My Collections' because my collections uses href="/collections?user_id={{ g.user.id }}" to filter for g.user and requests an empty string if there is no g.user. Is there a way to improve this?
     if request.args and request.args["user_id"] == "":
         flash("Please login or signup to manage your collections", "danger")
         return redirect("/login")
@@ -228,9 +239,7 @@ def edit_collection():
 
     except:
         flash("Unable to update {collection.name}", "danger")
-        return render_template(
-            "/magic_items/edit_collection.html", collection=collection, form=form
-        )
+        abort(403)
 
 
 @magic_routes.route("/collections/add-item", methods=["POST"])
@@ -279,9 +288,13 @@ def delete_collection():
     if g.user.id is not collection.user_id:
         flash("Not authorized to make changes to that collection", "danger")
         return redirect(f"/collections?user_id={g.user.id}")
-
-    CollectionService.delete(collection_id, g.user.id)
-    return redirect(f"/collections?user_id={g.user.id}")
+    try:
+        CollectionService.delete(collection_id, g.user.id)
+        return redirect(f"/collections?user_id={g.user.id}")
+    except:
+        flash("Not authorized to make changes to that collection", "danger")
+        abort(403)
+        
 
 
 @magic_routes.route("/collections/random", methods=["GET"])

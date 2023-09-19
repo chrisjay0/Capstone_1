@@ -21,7 +21,7 @@ from magic_items.models import (
     ItemCollection as ItemCollectionModel,
 )
 from magic_items.domains import (
-    MagicItem as MagicItemDomain,
+    MagicItemDomain as MagicItemDomain,
     Collection as CollectionDomain,
 )
 

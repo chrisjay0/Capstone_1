@@ -7,6 +7,40 @@ from magic_items.models import (
     ItemCollection as ItemCollectionModel,
 )
 
+COLLECTION_FILTERS = [
+    'name',
+    'description',
+    'user_id',
+    'date_created',
+    'last_updated',
+    'p',
+]
+
+MAGIC_ITEM_FILTERS = [
+    'name',
+    'description',
+    'created_by',
+    'date_created',
+    'last_updated',
+    'item_type',
+    'rarity',
+    'source',
+    'p',
+]
+
+MAX_CHAR_SHORTEN = {
+    "description":55,
+    "heading":20,
+    "title":18,
+}
+
+def shorten_strings(strings:dict) -> dict:
+    for (name, string) in strings.items():
+        if len(string) > MAX_CHAR_SHORTEN.get(name):
+            strings[name] = string[0:MAX_CHAR_SHORTEN.get(name)] + '...'
+    return strings
+    
+
 
 @dataclass
 class ItemVariant:
@@ -15,7 +49,7 @@ class ItemVariant:
 
 
 @dataclass
-class MagicItem:
+class MagicItemDomain:
     id: int
     name: str
     item_type: str
@@ -26,30 +60,24 @@ class MagicItem:
     source: str
     date_created: datetime
     last_updated: datetime
-
+    
     @property
-    def shorten_description(self):
-        desc = self.description[1]
-        if len(desc) <= 55:
-            return desc
-        return desc[0:55] + "..."
-
-    @property
-    def shorten_heading(self):
-        desc = self.description[0]
-        if len(desc) <= 20:
-            return desc
-        return desc[0:20] + "..."
-
-    @property
-    def shorten_title(self):
-        name = self.name
-        if len(name) <= 18:
-            return name
-        return name[0:18] + "..."
+    def short_strings(self) -> dict:
+        
+        strings = {
+            'title':self.name,
+            'heading':self.description[0],
+            'description':self.description[1],
+        }
+                
+        return shorten_strings(strings)
+    
+    def attributes(self):
+        [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))]
 
     @classmethod
-    def from_model(cls, model_instance: MagicItemModel) -> "MagicItem":
+    def from_model(cls, model_instance: MagicItemModel) -> "MagicItemDomain":
+        
         return cls(
             id=model_instance.id,
             name=model_instance.name,
@@ -62,6 +90,30 @@ class MagicItem:
             date_created=model_instance.date_created,
             last_updated=model_instance.last_updated,
         )
+
+    @classmethod
+    def from_models_list(cls, model_list: List[MagicItemModel] ) -> List["MagicItemDomain"]:
+        
+        domain_list = []
+        
+        for model_instance in model_list:
+            
+            domain_instance = cls(
+            id=model_instance.id,
+            name=model_instance.name,
+            item_type=model_instance.item_type,
+            rarity=model_instance.rarity,
+            is_variant=model_instance.is_variant,
+            description=model_instance.description,
+            created_by=model_instance.created_by,
+            source=model_instance.source,
+            date_created=model_instance.date_created,
+            last_updated=model_instance.last_updated,
+        )
+            
+            domain_list.append(domain_instance)
+            
+        return domain_list
 
 
 @dataclass
@@ -78,30 +130,25 @@ class ItemCollection:
             times_on_collection=model_instance.times_on_collection,
         )
 
-
 @dataclass
 class Collection:
     id: int
     name: str
     description: str
     user_id: int
-    items: List[MagicItem]
+    items: List[MagicItemDomain]
     date_created: datetime
     last_updated: datetime
-
+    
     @property
-    def shorten_description(self):
-        desc = self.description
-        if len(desc) <= 55:
-            return desc
-        return desc[0:55] + "..."
-
-    @property
-    def shorten_title(self):
-        name = self.name
-        if len(name) <= 18:
-            return name
-        return name[0:18] + "..."
+    def short_strings(self) -> dict:
+        
+        strings = {
+            'title':self.name,
+            'description':self.description,
+        }
+                
+        return shorten_strings(strings)
 
     @classmethod
     def from_model(cls, model_instance: CollectionModel) -> "Collection":
@@ -110,7 +157,27 @@ class Collection:
             name=model_instance.name,
             description=model_instance.description,
             user_id=model_instance.user_id,
-            items=model_instance.items,
+            items=MagicItemDomain.from_models_list(model_instance.items),
             date_created=model_instance.date_created,
             last_updated=model_instance.last_updated,
         )
+        
+@dataclass
+class StandardCollectionFilters:
+    
+    @classmethod
+    def check(cls, **filters: dict,) -> bool:
+        for key in filters.keys():
+            if key not in COLLECTION_FILTERS:
+                return key
+        return True
+        
+@dataclass
+class StandardMagicItemFilters:
+    
+    @classmethod
+    def check(cls, **filters: dict,) -> bool:
+        for key in filters.keys():
+            if key not in MAGIC_ITEM_FILTERS:
+                return key
+        return True

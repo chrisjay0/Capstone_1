@@ -1,8 +1,8 @@
 <div class="card" style="width: 18rem;">
     <div class="card-body">
         <h5 class="card-title">
-            {{ collection.shorten_title }}</h5>
-        <p class="card-text">{{collection.shorten_description}}</p>
+            {{ collection.short_strings['title'] }}</h5>
+        <p class="card-text">{{ collection.short_strings['description'] }}</p>
         <div class="row align-items-end">
             <div class="col-7 align-items-start">
                 <a href="/collections/{{collection.id}}" class="btn btn-primary btn-sm">See collection</a>

@@ -6,34 +6,41 @@ from magic_items.models import (
 )
 from datetime import datetime
 from database import db
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import random
 
 from sqlalchemy import func
-from sqlalchemy.orm import load_only
 
 UNAUTH_MSG = "User not authorized"
 
+ITEMS_PER_PAGE = 12
+
 ITEM_RARITY = [
-    "Common",
-    "Uncommon",
-    "Rare",
-    "Very Rare",
-    "Legendary",
+    ("Common","Common"),
+    ("Uncommon","Uncommon"),
+    ("Rare","Rare"),
+    ("Very Rare","Very Rare"),
+    ("Legendary","Legendary"),
 ]
 
 ITEM_TYPES = [
-    "Scroll",
-    "Rod",
-    "Armor",
-    "Ammunition",
-    "Ring",
-    "Potion",
-    "Staff",
-    "Wondrous Item",
-    "Wand",
-    "Weapon",
+    ("Scroll","Scroll"),
+    ("Rod","Rod"),
+    ("Armor","Armor"),
+    ("Ammunition","Ammunition"),
+    ("Ring","Ring"),
+    ("Potion","Potion"),
+    ("Staff","Staff"),
+    ("Wondrous Item","Wondrous Item"),
+    ("Wand","Wand"),
+    ("Weapon","Weapon"),
+]
+
+ITEM_SOURCE = [
+    ("","Source"),
+    ("dnd5eapi","Official Resources"),
+    ("user","User Created"),
 ]
 
 from magic_items.forms import CollectionAddForm, ItemForm, ItemFilterForm
@@ -41,7 +48,9 @@ from magic_items.forms import CollectionAddForm, ItemForm, ItemFilterForm
 from magic_items.domains import (
     Collection as CollectionDomain,
     ItemCollection as ItemCollectionDomain,
-    MagicItem as MagicItemDomain,
+    MagicItemDomain as MagicItemDomain,
+    StandardCollectionFilters,
+    StandardMagicItemFilters,
 )
 
 
@@ -55,7 +64,7 @@ class MagicItemFlashMessage:
         "category": "danger",
     }
     login_to_manage = {
-        "message": "Please login or signup to manage magic items",
+        "message": "Please login or signup to manage magic items and collections",
         "category": "warning",
     }
     
@@ -104,11 +113,18 @@ class MagicItemService:
         cls,
         **filters: dict,
     ) -> List[MagicItemDomain]:
+        
+        
+        invalid_filter = StandardMagicItemFilters.check(**filters)
+        if invalid_filter is not True:
+            print(f"Invalid filter: {invalid_filter}")
+            raise Exception('Magic Item filter not allowed')
+
 
         edited_filter = {}
 
         for filter in filters:
-            if filters[filter] != "":
+            if filters[filter] != "" and filter != "p":
                 edited_filter.update({filter: filters[filter]})
 
         model_magic_items = MagicItemModel.query.filter_by(**edited_filter).all()
@@ -119,6 +135,38 @@ class MagicItemService:
             domain_magic_items.append(magic_item_domain)
 
         return domain_magic_items
+
+    @classmethod
+    def get_filtered_paginated(
+        cls,
+        **filters: dict,
+    ) -> List[List[MagicItemDomain]]:
+        
+        
+        if StandardMagicItemFilters.check(**filters) is not True:
+            raise Exception('Magic Item filter not allowed')
+
+        edited_filter = {}
+
+        for filter in filters:
+            if filters[filter] != "" and filter != "p":
+                edited_filter.update({filter: filters[filter]})
+
+        model_magic_items = MagicItemModel.query.filter_by(**edited_filter).all()
+        
+        model_pagination = db.paginate(model_magic_items, per_page=ITEMS_PER_PAGE)
+        
+        domain_pagination = []
+        
+        i = 1
+        
+        while i <= model_pagination.pages:
+            domain_page = MagicItemDomain.from_models_list(model_pagination.items)
+            domain_pagination.append(domain_page)
+            model_pagination = model_pagination.next()
+            i += 1
+
+        return domain_pagination
 
     @classmethod
     def update(cls, user_id: int, magic_item_id: int, form: ItemForm):
@@ -155,16 +203,7 @@ class MagicItemService:
         cls,
     ) -> MagicItemDomain:
 
-        item_model = (
-            MagicItemModel.query.options(load_only("id"))
-            .offset(
-                func.floor(
-                    func.random() * db.session.query(func.count(MagicItemModel.id))
-                )
-            )
-            .limit(1)
-            .all()[0]
-        )
+        item_model = MagicItemModel.query.order_by(func.random()).first()
 
         return MagicItemDomain.from_model(item_model)
 
@@ -236,8 +275,33 @@ class CollectionService:
         cls,
         **filters: dict,
     ) -> List[CollectionDomain]:
+        
+        if StandardCollectionFilters.check(**filters) is not True:
+            raise Exception('Collection filter not allowed')
 
         model_collections = CollectionModel.query.filter_by(**filters).all()
+        
+        domain_collections = []
+
+        for collection_model in model_collections:
+            collection_domain = CollectionDomain.from_model(collection_model)
+            domain_collections.append(collection_domain)
+
+        return domain_collections
+
+    @classmethod
+    def get_filtered_paginated(
+        cls,
+        **filters: dict,
+    ) -> List[CollectionDomain]:
+        
+        if StandardCollectionFilters.check(**filters) is not True:
+            raise Exception('Collection filter not allowed')
+
+        model_collections = CollectionModel.query.filter_by(**filters).all()
+        
+        model_page = db.paginate(model_collections)
+        
         domain_collections = []
 
         for collection_model in model_collections:
@@ -315,16 +379,7 @@ class CollectionService:
         cls,
     ) -> CollectionDomain:
 
-        collection_model = (
-            CollectionModel.query.options(load_only("id"))
-            .offset(
-                func.floor(
-                    func.random() * db.session.query(func.count(CollectionModel.id))
-                )
-            )
-            .limit(1)
-            .all()[0]
-        )
+        collection_model = CollectionModel.query.order_by(func.random()).first()
 
         return CollectionDomain.from_model(collection_model)
 
@@ -334,6 +389,7 @@ class CollectionService:
         collection_id: int,
     ) -> MagicItemDomain:
 
+        
         item_collection_models = ItemCollectionModel.query.filter_by(
             collection_id=collection_id
         ).all()
@@ -349,7 +405,7 @@ class CollectionService:
         item_id = random.choice(rand_inventory).item_id
 
         item_model = MagicItemModel.query.get(item_id)
-
+        
         return MagicItemDomain.from_model(item_model)
 
 

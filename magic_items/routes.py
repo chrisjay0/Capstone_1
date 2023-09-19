@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, g, flash, redirect, request, abort
+
 from magic_items.services import (
     MagicItemService,
     ItemForm,
@@ -48,15 +49,11 @@ def add_item():
     form = ItemForm()
 
     if form.validate_on_submit():
-        try:
-            item = MagicItemService.create(g.user.id, form)
-            flash(**MagicItemFlashMessage.create_success(item.name))
-            return redirect(f"/magic-items/{item.id}")
+        item = MagicItemService.create(g.user.id, form)
+        flash(**MagicItemFlashMessage.create_success(item.name))
+        return redirect(f"/magic-items/{item.id}")
 
-        except:
-            flash("error", "danger")
-            return render_template("magic_items/new_magic_item.html", form=form)
-
+    # TODO: Currently form errors are hadled in the template. Should this change?
     return render_template("magic_items/new_magic_item.html", form=form)
 
 
@@ -80,7 +77,7 @@ def show_item(item_id):
 @magic_routes.route("/magic-items", methods=["GET"])
 def show_items():
 
-    form = ItemFilterForm(object=request.args)
+    form = ItemFilterForm()
 
     if "created_by" in request.args and request.args["created_by"] == "":
         flash("Please login to manage magic items", "warning")
@@ -152,7 +149,16 @@ def delete_item():
 @magic_routes.route("/magic-items/random", methods=["GET"])
 def random_item():
     item = MagicItemService.random()
-    return render_template("magic_items/magic_item.html", item=item)
+    user = None
+    if (item.created_by):
+        user = UserService.get_by_id(item.created_by)
+
+    return render_template(
+        "magic_items/magic_item.html",
+        item=item,
+        user=user,
+    )
+
 
 
 #########################################################################################################
@@ -194,11 +200,6 @@ def add_new_collection():
 
 @magic_routes.route("/collections", methods=["GET"])
 def show_collections():
-
-    # TODO: Using request args to test if someone attempted to look at 'My Collections' because my collections uses href="/collections?user_id={{ g.user.id }}" to filter for g.user and requests an empty string if there is no g.user. Is there a way to improve this?
-    if request.args and request.args["user_id"] == "":
-        flash("Please login or signup to manage your collections", "danger")
-        return redirect("/login")
 
     collections = CollectionService.get_filtered(**request.args)
     return render_template(
@@ -314,7 +315,9 @@ def random_item_in_collection():
     collection_id = int(request.args["collection_id"])
 
     item = CollectionService.random_item(collection_id)
-    user = UserService.get_by_id(item.created_by)
+    user = None
+    if (item.created_by):
+        user = UserService.get_by_id(item.created_by)
 
     return render_template(
         "magic_items/magic_item.html",

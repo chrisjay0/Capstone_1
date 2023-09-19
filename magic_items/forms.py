@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 
-from magic_items.services import ITEM_RARITY, ITEM_TYPES
+from magic_items.services import ITEM_RARITY, ITEM_TYPES, ITEM_SOURCE
 
 
 class ItemForm(FlaskForm):
@@ -27,6 +27,6 @@ class ItemFilterForm(FlaskForm):
     class Meta:
         csrf = False
 
-    item_type = SelectField("Magic Item Type", choices=[""] + ITEM_TYPES)
-    rarity = SelectField("Rarity", choices=[""] + ITEM_RARITY)
-    source = SelectField("Source", choices=["", "dnd5eapi", "user"])
+    item_type = SelectField("Magic Item Type", choices=[("","Type")] + ITEM_TYPES)
+    rarity = SelectField("Rarity", choices=[("","Rarity")] + ITEM_RARITY)
+    source = SelectField("Source", choices=ITEM_SOURCE)

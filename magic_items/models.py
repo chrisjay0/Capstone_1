@@ -89,13 +89,6 @@ class MagicItem(db.Model):
     def __repr__(self):
         return f"<Magic Item #{self.id}: {self.name}, {self.item_type}>"
 
-    @property
-    def shorten_description(self):
-        desc = self.description[1]
-        if len(desc) <= 55:
-            return desc
-        return desc[0:55] + "..."
-
 
 class ItemCollection(db.Model):
     """Mapping Items to Collections"""

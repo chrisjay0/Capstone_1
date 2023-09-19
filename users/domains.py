@@ -1,7 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 from datetime import datetime
-from magic_items.domains import Collection, MagicItem
+from magic_items.domains import Collection, MagicItemDomain
 from users.models import User as UserModel
 
 
@@ -14,7 +14,7 @@ class User:
     bio: str
     password: str
     collections: List[Collection]
-    created_items: List[MagicItem]
+    created_items: List[MagicItemDomain]
     date_created: datetime
     last_updated: datetime
 

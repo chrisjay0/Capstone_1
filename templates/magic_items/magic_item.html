@@ -49,6 +49,7 @@
             {% if item.created_by %}created by: <a href="/users/{{user.id}}">{{ user.username }}</a>{% else %}from D&D 5e
             SRD via <a href="http://dnd5eapi.co">dnd5eapi.co</a>{% endif %}
         </i></p>
+        <p>{{item.attributes()}}</p>
     {% for description_line in item.description %}
     <p>{{description_line}}</p>
     {% endfor %}
